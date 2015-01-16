@@ -60,7 +60,7 @@ object Finch extends Build {
   lazy val allSettings = baseSettings ++ buildSettings ++ publishSettings
 
   lazy val docSettings = site.settings ++ ghpages.settings ++ unidocSettings ++ Seq(
-    site.addMappingsToSiteDir(mappings in (ScalaUnidoc, packageDoc), "latest/api"),
+    site.addMappingsToSiteDir(mappings in (ScalaUnidoc, packageDoc), "docs"),
     git.remoteRepo := s"git@github.com:finagle/finch.git",
     unidocProjectFilter in (ScalaUnidoc, unidoc) := inAnyProject -- inProjects(demo)
   )
