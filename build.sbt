@@ -107,6 +107,11 @@ lazy val core = project
   .settings(moduleName := "finch-core")
   .settings(allSettings)
   .disablePlugins(CoverallsPlugin)
+  .dependsOn(
+    ProjectRef(uri("git://github.com/travisbrown/catbird.git#demo"), "finagle"),
+    ProjectRef(uri("git://github.com/travisbrown/catbird.git#demo"), "test") % "test",
+    ProjectRef(uri("git://github.com/travisbrown/catbird.git#demo"), "util")
+  )
 
 lazy val json = project
   .settings(moduleName := "finch-json")

@@ -22,6 +22,7 @@
  */
 package io.finch.request
 
+import io.catbird.util._
 import io.finch.HttpRequest
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -40,49 +41,17 @@ class ApplicativeRequestReaderSpec extends FlatSpec with Matchers {
     param("c").as[Int]
   ).asTuple
   
-  def extractNotParsedTargets (result: Try[(Int, Double, Int)]): AnyRef = {
-    (result handle {
-      case RequestErrors(errors) => errors map {
-        case NotParsed(item, _, _) => item
-      }
-      case NotParsed(item, _, _) => Seq(item)
-      case _ => Seq()
-    }).get
-  }
-
-  "The applicative reader" should "produce three errors if all three numbers cannot be parsed" in {
-    val request = Request("a"->"foo", "b"->"foo", "c"->"foo")
-    extractNotParsedTargets(Await.result(reader(request).liftToTry)) shouldBe Seq(
-      ParamItem("a"),
-      ParamItem("b"),
-      ParamItem("c")
-    )
-  }
-  
-  it should "produce two validation errors if two numbers cannot be parsed" in {
-    val request = Request("a" -> "foo", "b" -> "7.7", "c" -> "foo")
-    extractNotParsedTargets(Await.result(reader(request).liftToTry)) shouldBe Seq(
-      ParamItem("a"),
-      ParamItem("c")
-    )
-  }
-  
   it should "produce two ParamNotFound errors if two parameters are missing" in {
     val request = Request("b" -> "7.7")
-    Await.result(reader(request).liftToTry) shouldBe Throw(RequestErrors(Seq(
-      NotPresent(ParamItem("a")),
-      NotPresent(ParamItem("c"))
+    Await.result(reader.run(request).liftToTry) shouldBe Throw(RequestErrors(Seq(
+      NotPresent,
+      NotPresent
     )))
-  }
-
-  it should "produce one error if the last parameter cannot be parsed to an integer" in {
-    val request = Request("a"->"9", "b"->"7.7", "c"->"foo")
-    extractNotParsedTargets(Await.result(reader(request).liftToTry)) shouldBe Seq(ParamItem("c"))
   }
   
   it should "parse all integers and doubles" in {
     val request = Request("a"->"9", "b"->"7.7", "c"->"5")
-    Await.result(reader(request)) shouldBe ((9, 7.7, 5))
+    Await.result(reader.run(request)) shouldBe ((9, 7.7, 5))
   }
 
   it should "be polymorphic in terms of request type" in {
@@ -93,8 +62,8 @@ class ApplicativeRequestReaderSpec extends FlatSpec with Matchers {
       aa <- param("a")
     } yield aa + ii
 
-    Await.result(a(MyReq(Request("a" -> "foo"), 10))) shouldBe "10foo"
-    Await.result(b(MyReq(Request("a" -> "foo"), 10))) shouldBe "foo10"
+    Await.result(a.run(MyReq(Request("a" -> "foo"), 10))) shouldBe "10foo"
+    Await.result(b.run(MyReq(Request("a" -> "foo"), 10))) shouldBe "foo10"
   }
 
   it should "compiles with both implicits Generic and DecodeRequest in the scope" in {
@@ -103,13 +72,13 @@ class ApplicativeRequestReaderSpec extends FlatSpec with Matchers {
       DecodeRequest { s => Try(MyString(s)) }
 
     val foo: RequestReader[MyString] = param("a").as[MyString]
-    Await.result(foo(Request("a" -> "foo"))) shouldBe MyString("foo")
+    Await.result(foo.run(Request("a" -> "foo"))) shouldBe MyString("foo")
 
     case class MyInt(i: Int)
     implicit val decodeMyInt: DecodeRequest[MyInt] =
       DecodeRequest { s => Try(MyInt(s.toInt)) }
 
     val bar: RequestReader[MyInt] = param("a").as[MyInt]
-    Await.result(bar(Request("a" -> "100"))) shouldBe MyInt(100)
+    Await.result(bar.run(Request("a" -> "100"))) shouldBe MyInt(100)
   }
 }

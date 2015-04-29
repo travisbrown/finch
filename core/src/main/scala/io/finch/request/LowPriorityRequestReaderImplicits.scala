@@ -1,6 +1,7 @@
 package io.finch.request
 
 import com.twitter.util.{Future, Try}
+import io.catbird.util._
 
 import scala.reflect.ClassTag
 
@@ -21,16 +22,5 @@ trait LowPriorityRequestReaderImplicits {
     implicit d: DecodeAnyRequest, tag: ClassTag[A]
   ): DecodeRequest[A] = new DecodeRequest[A] {
     def apply(req: String): Try[A] = d(req)(tag)
-  }
-
-  /**
-   * Adds a `~>` and `~~>` compositors to `RequestReader` to compose it with function of one argument.
-   */
-  implicit class RrArrow1[R, A](rr: PRequestReader[R, A]) {
-    def ~~>[B](fn: A => Future[B]): PRequestReader[R, B] =
-      rr.embedFlatMap(fn)
-
-    def ~>[B](fn: A => B): PRequestReader[R, B] =
-      rr.map(fn)
   }
 }

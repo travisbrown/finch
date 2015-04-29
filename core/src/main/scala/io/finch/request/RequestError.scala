@@ -53,8 +53,8 @@ case class RequestErrors(errors: Seq[Throwable])
  *
  * @param item the missing request item
  */
-case class NotPresent(item: RequestItem)
-  extends RequestError(s"Required ${item.description} not present in the request.")
+case object NotPresent
+  extends RequestError(s"Required item not present in the request.")
 
 /**
  * An exception that indicates a broken [[[io.finch.request.ValidationRule ValidationRule]] on the request item.
@@ -62,8 +62,8 @@ case class NotPresent(item: RequestItem)
  * @param item the invalid request item
  * @param rule the rule description
  */
-case class NotValid(item: RequestItem, rule: String)
-  extends RequestError(s"Validation failed: ${item.description} $rule.")
+case class NotValid(rule: String)
+  extends RequestError(s"Validation failed: $rule.")
 
 /**
  * An exception that indicates that a request item could be parsed.
@@ -72,8 +72,8 @@ case class NotValid(item: RequestItem, rule: String)
  * @param targetType the type the item should be converted into
  * @param cause the cause of the parsing error
  */
-case class NotParsed(item: RequestItem, targetType: ClassTag[_], cause: Throwable)
+case class NotParsed(targetType: ClassTag[_], cause: Throwable)
   extends RequestError(
-    s"${item.description} cannot be converted to ${targetType.runtimeClass.getSimpleName}: ${cause.getMessage}."
+    s"Item cannot be converted to ${targetType.runtimeClass.getSimpleName}: ${cause.getMessage}."
   )
 
