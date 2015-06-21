@@ -43,7 +43,7 @@ trait EncodeResponse[-A] {
 }
 
 object EncodeResponse {
-  type Aux[A, C0] = EncodeResponse[A] { type C = C0 }
+  type Aux[A, -C0] = EncodeResponse[A] { type C = C0 }
 
   /**
    * This is a convenience class that lets us work around the fact that Scala
@@ -119,7 +119,7 @@ object EncodeAnyResponse {
   }
 }
 
-class TurnIntoHttp[A](val e: EncodeResponse[A]) extends Service[A, HttpResponse] {
+class TurnIntoHttp[A](val e: EncodeResponse.Aux[A, Ok.C]) extends Service[A, HttpResponse] {
   def apply(req: A): Future[HttpResponse] = Ok(req)(e).toFuture
 }
 
@@ -128,5 +128,5 @@ class TurnIntoHttp[A](val e: EncodeResponse[A]) extends Service[A, HttpResponse]
  * [[io.finch.response.EncodeResponse EncodeResponse]].
  */
 object TurnIntoHttp {
-  def apply[A](implicit e: EncodeResponse[A]): Service[A, HttpResponse] = new TurnIntoHttp[A](e)
+  def apply[A](implicit e: EncodeResponse.Aux[A, Ok.C]): Service[A, HttpResponse] = new TurnIntoHttp[A](e)
 }
