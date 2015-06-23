@@ -147,3 +147,162 @@ res9: com.twitter.util.Future[Pet] = ...
 So our `petTagsReader` and `createdPetReader` are two pieces that we can use
 when writing a web service that processes incoming HTTP requests like the
 examples we defined above.
+
+
+### Serving simple services
+
+Starting an HTTP server just takes a couple of lines. If you start a REPL with
+`sbt core/console`, for example, you can write the following:
+
+```scala
+import com.twitter.finagle.Httpx
+import com.twitter.util.Await
+import io.finch.request._, io.finch.route._
+
+val server = Httpx.serve(":8088", (Get /> "Hello world").toService)
+```
+
+This starts a server on your local port 8088 that responds to `GET` requests for
+`/` with "Hello world" (if you get an "Address already in use" error from the
+line above, you can change the port number to something else).
+
+You can confirm that the server is running [in your
+browser](http://localhost:8088/) or with a tool like curl:
+
+```bash
+$ curl -i http://localhost:8088/
+HTTP/1.1 200 OK
+Content-Type: text/plain;charset=utf-8
+Content-Length: 11
+
+Hello world
+```
+
+This works because `Get /> "Hello world"` is a `Router[String]`, and Finch knows
+how to serialize a string to plain text. We can also write more interesting
+routers and serve them (after stopping our current server):
+
+```scala
+Await.ready(server.close())
+
+val server = Httpx.serve(":8088", (Get / int /> ("hey" * _)).toService)
+```
+
+Now [`http://localhost:8088/4`](http://localhost:8088/4) will show "heyheyheyhey",
+since the `int` matches the `4` in the URL, and the `("hey" * _)` function takes
+the matched integer and repeats "hey" that many times.
+
+If we want to return more interesting responses, we can close this REPL and open
+a new one in the `finch-argonaut` project with `sbt argonaut/console`. Now we can
+return anything that Argonaut knows how to encode as JSON:
+
+```scala
+import com.twitter.finagle.Httpx
+import com.twitter.util.Await
+import io.finch.request._, io.finch.route._, io.finch.argonaut._
+
+def intToMap(i: Int) = Map("a" -> i, "b" -> (i + 1))
+
+val server = Httpx.serve(":8088", (Get / int /> intToMap).toService)
+```
+
+Now [`http://localhost:8088/4`](http://localhost:8088/4) shows `{"a":4,"b":5}`,
+and the content type is `application/json`:
+
+```bash
+$ curl -i http://localhost:8088/4
+HTTP/1.1 200 OK
+Content-Type: application/json;charset=utf-8
+Content-Length: 13
+
+{"a":4,"b":5}
+```
+
+We can also serve our own types if we have an Argonaut `EncodeJson` instance for
+them:
+
+```scala
+Await.ready(server.close())
+
+import _root_.argonaut._, Argonaut._
+
+case class Cat(name: String, breed: String, age: Int)
+
+implicit val catEncoder: EncodeJson[Cat] = jencode3L(
+  (cat: Cat) => (cat.name, cat.breed, cat.age)
+)("name", "breed", "age")
+
+val router = Get / "cat" /> Cat("Bob", "Persian", 7)
+val server = Httpx.serve(":8088", router.toService)
+```
+
+Now [`http://localhost:8088/cat`](http://localhost:8088/cat) will give us back a
+JSON object representing Bob:
+
+```json
+{"name":"Bob","breed":"Persian","age":7}
+```
+
+We can combine routers that return the same type with `|`:
+
+```scala
+Await.ready(server.close())
+
+val catsRouter =
+  Get / "bob" /> Cat("Bob", "Persian", 7) | Get / "sue" /> Cat("Sue", "Tabby", 5)
+
+val server = Httpx.serve(":8088", catsRouter.toService)
+```
+
+And then:
+
+```bash
+$ curl -i http://localhost:8088/bob
+HTTP/1.1 200 OK
+Content-Type: application/json;charset=utf-8
+Content-Length: 40
+
+{"name":"Bob","breed":"Persian","age":7}
+```
+
+And:
+
+```bash
+$ curl -i http://localhost:8088/sue
+HTTP/1.1 200 OK
+Content-Type: application/json;charset=utf-8
+Content-Length: 38
+
+{"name":"Sue","breed":"Tabby","age":5}
+```
+
+For routers that return different types we need to use `:+:` instead of `|`:
+
+```scala
+Await.ready(server.close())
+
+case class Dog(name: String, breed: String, age: Int)
+
+implicit val dogEncoder: EncodeJson[Dog] = jencode3L(
+  (dog: Dog) => (dog.name, dog.breed, dog.age)
+)("name", "breed", "age")
+
+val petsRouter =
+  Get / "bob" /> Cat("Bob", "Persian", 7) :+: Get / "spot" /> Dog("Spot", "Terrier", 8)
+
+val server = Httpx.serve(":8088", petsRouter.toService)
+```
+
+And then:
+
+```bash
+$ curl -i http://localhost:8088/spot
+HTTP/1.1 200 OK
+Content-Type: application/json;charset=utf-8
+Content-Length: 41
+
+{"name":"Spot","breed":"Terrier","age":8}
+```
+
+We can combine and serve any types with `:+:` as long as Finch knows how to
+serve them.
