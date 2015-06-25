@@ -1,7 +1,6 @@
 package io.finch.demo.petstore
 
 import com.twitter.util.Await
-import io.finch.demo.petstore._
 import org.scalacheck.Prop.BooleanOperators
 import org.scalatest.{Matchers, FlatSpec}
 import org.scalatest.prop.Checkers
@@ -15,6 +14,7 @@ class PetstoreDbSpec extends FlatSpec with Matchers with Checkers {
     val db = new PetstoreDb()
     Await.ready(db.addPet(rover.copy(id = None)))
     Await.ready(db.addPet(jack.copy(id = None)))
+    Await.ready(db.addPet(sue.copy(id = None)))
   }
 
   "The Petstore DB" should "allow pet lookup by id" in new DbContext {
@@ -22,12 +22,14 @@ class PetstoreDbSpec extends FlatSpec with Matchers with Checkers {
   }
 
   it should "allow adding pets" in new DbContext {
-    val result = for {
-      sueId <- db.addPet(sue)
-      newSue <- db.getPet(sueId)
-    } yield newSue === Some(sue.copy(id = Some(sueId)))
+    check { (pet: Pet) =>
+      val result = for {
+        petId <- db.addPet(pet)
+        newPet <- db.getPet(petId)
+      } yield newPet === Some(pet.copy(id = Some(petId)))
 
-    assert(Await.result(result))
+      Await.result(result)
+    }
   }
 
   it should "fail appropriately for pet ids that don't exist" in new DbContext {

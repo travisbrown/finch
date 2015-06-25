@@ -1,7 +1,6 @@
 package io.finch.demo.petstore
 
 import _root_.argonaut._, Argonaut._
-import io.finch.demo.petstore._
 import org.scalacheck.Prop.BooleanOperators
 import org.scalatest.{Matchers, FlatSpec}
 import org.scalatest.prop.Checkers
