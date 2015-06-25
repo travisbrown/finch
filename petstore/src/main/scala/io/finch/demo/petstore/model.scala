@@ -49,8 +49,8 @@ object Status {
     DecodeJson { c =>
       c.as[String].flatMap[Status] { s =>
         Status.fromString(s).fold(
-          DecodeResult.fail(s"Unknown status: $other", c.history)
-        )(DecodeResult.ok)
+          DecodeResult.fail(s"Unknown status", c.history)
+        )(DecodeResult.ok(_))
       }
     }
 
