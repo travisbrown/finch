@@ -35,11 +35,10 @@ case object Sold extends Status {
 }
 
 object Status {
-  def fromString(s: String): Option[Status] = s match {
-    case "available" => Some(Available)
-    case "pending" => Some(Pending)
-    case "sold" => Some(Sold)
-    case _ => None
+  def fromString(s: String): Status = s match {
+    case "available" => Available
+    case "pending" => Pending
+    case "sold" => Sold
   }
 
   val statusEncode: EncodeJson[Status] =
@@ -47,10 +46,11 @@ object Status {
 
   val statusDecode: DecodeJson[Status] =
     DecodeJson { c =>
-      c.as[String].flatMap[Status] { s =>
-        Status.fromString(s).fold(
-          DecodeResult.fail(s"Unknown status", c.history)
-        )(DecodeResult.ok(_))
+      c.as[String].flatMap[Status] {
+        case "available" => DecodeResult.ok(Available)
+        case "pending" => DecodeResult.ok(Pending)
+        case "sold" => DecodeResult.ok(Sold)
+        case other => DecodeResult.fail(s"Unknown status: $other", c.history)
       }
     }
 
