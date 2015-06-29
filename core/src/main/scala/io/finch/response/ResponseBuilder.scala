@@ -41,7 +41,6 @@ case class ResponseBuilder(
   contentType: Option[String] = None,
   charset: Option[String] = None
 ) {
-  type C <: String
 
   /**
    * Creates a new response builder with the given `headers`.
@@ -77,7 +76,7 @@ case class ResponseBuilder(
    *
    * @param body the response body
    */
-  def apply[A](body: A)(implicit encode: EncodeResponse.Aux[A, C]): HttpResponse = {
+  def apply[A](body: A)(implicit encode: EncodeResponse[A]): HttpResponse = {
     val rep = Response(status)
     rep.contentType = contentType.getOrElse(encode.contentType)
     charset.orElse(encode.charset).foreach { c => rep.charset = c }
