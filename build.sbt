@@ -110,8 +110,12 @@ lazy val root = project.in(file("."))
         |import io.finch.route._
       """.stripMargin
   )
-  .aggregate(core, demo, argonaut, jackson, json4s, auth, benchmarks)
-  .dependsOn(core, argonaut)
+  .aggregate(codec, core, demo, argonaut, jackson, json4s, auth, benchmarks)
+  .dependsOn(codec, core, argonaut)
+
+lazy val codec = project
+  .settings(moduleName := "finch-codec")
+  .settings(allSettings)
 
 lazy val core = project
   .settings(moduleName := "finch-core")
@@ -137,8 +141,14 @@ lazy val demo = project
 lazy val argonaut = project
   .settings(moduleName := "finch-argonaut")
   .settings(allSettings)
-  .settings(libraryDependencies += "io.argonaut" %% "argonaut" % "6.1")
-  .dependsOn(core, test % "test")
+  .settings(
+    libraryDependencies ++= Seq(
+      "io.argonaut" %% "argonaut" % "6.1",
+      "org.spire-math" %% "argonaut-support" % "0.8.0",
+      "org.spire-math" %% "jawn-parser" % "0.8.0"
+    )
+  )
+  .dependsOn(codec, core, test % "test")
 
 lazy val jackson = project
   .settings(moduleName := "finch-jackson")
