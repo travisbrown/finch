@@ -26,7 +26,7 @@ object endpoint{
   }
 
   def updatePetEndpt(db: PetstoreDb): Router[RequestReader[Pet]] = Put / "pet" / long /> { petId: Long =>
-    val rr: RequestReader[Pet] = body.as[ Pet ].embedFlatMap { pet =>
+    val rr: RequestReader[Pet] = body.as[Pet].embedFlatMap { pet =>
       val f: Future[Pet] = for {
         _ <- db.updatePet(pet.copy(id = Some(petId)))
         newPet <- db.getPet(petId)
@@ -102,13 +102,13 @@ object endpoint{
     }
   }
 
-  def addUsersViaList(db: PetstoreDb) = Post / "user" / "createWithList" /> {
+  def addUsersViaList(db: PetstoreDb): Router[RequestReader[Seq[User]]] = Post / "user" / "createWithList" /> {
     body.as[Seq[User]].embedFlatMap{uList =>
       db.addUsersViaList(uList)
     }
   }
 
-  def addUsersViaArray(db: PetstoreDb) = Post / "user" / "createWithArray" /> {
+  def addUsersViaArray(db: PetstoreDb): Router[RequestReader[Seq[User]]] = Post / "user" / "createWithArray" /> {
     body.as[Seq[User]].embedFlatMap { uList =>
       db.addUsersViaArray(uList)
     }

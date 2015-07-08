@@ -44,41 +44,40 @@ class PetstoreDb {
 //  }
 
   //Helper Method: Adds tag to tag map
+
   def addTag(inputTag: Tag): Future[Tag] = Future.value(
     tags.synchronized {
       val genId = if (tags.isEmpty) 0 else tags.keys.max + 1
       val inputId: Long = inputTag.id
-      val realId: Long = if (inputId != None) {
-        if (tags.exists(_._1 == inputId)) genId else inputId
-      } else {
-        genId
-      }
+      val realId: Long = if (tags.contains(inputId)) genId else inputId
       tags(realId) = inputTag.copy(id = realId)
       inputTag
     }
   )
 
   //POST: Add pet
-  def addPet(inputPet: Pet): Future[Long] = Future.value(
-    pets.synchronized {
-      val genId = if (pets.isEmpty) 0 else pets.keys.max + 1
-      val inputId: Option[Long] = inputPet.id
-      val id: Long = if (inputId != None) {
-        if (pets.exists(_._1 == inputId)) genId else inputId.getOrElse(genId) //repetition guard
-      } else genId
-      pets(id) = inputPet.copy(id = Some(id))
-      //Add tags into tag map
-//        for{
-//          tagList <- inputPet.tags
-//          t <- tagList
-//        } yield addTag(t)
-      inputPet.tags match{
-        case Some(tagList) => tagList.map(addTag(_))
-        case None => None
+
+  /**
+   * Adds a [[Pet]] to the database, validating that the id is empty.
+   *
+   * @param inputPet the new pet
+   * @return the id of the new pet
+   */
+  def addPet(inputPet: Pet): Future[Long] =
+    inputPet.id match {
+      case Some(_) => Future.exception(InvalidInput("New pet should not contain an id"))
+      case None => pets.synchronized {
+        val id = if (pets.isEmpty) 0 else pets.keys.max + 1
+        pets(id) = inputPet.copy(id = Some(id))
+
+        inputPet.tags match{
+          case Some(tagList) => tagList.map(addTag(_))
+          case None => None
+        }
+
+        Future.value(id)
       }
-      id
     }
-  )
 
   //PUT: Update existing pet given a pet object
   //@return: updated pet

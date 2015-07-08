@@ -93,6 +93,8 @@ object Tag {
 //        case x => DecodeResult.ok(Tag())
 //      }
 //    }
+  // Alternative way to validate:
+  // val validatingTagReader = bodyReader.shouldNot("contain backslash")(_.name.contains("\\"))
 
   implicit val tagCodec: CodecJson[Tag] =
     casecodec2(Tag.apply, Tag.unapply)("id", "name")

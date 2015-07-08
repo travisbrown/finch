@@ -10,7 +10,7 @@ Tests for the PetstoreDb class methods
  */
 
 class PetstoreDbSpec extends FlatSpec with Matchers with Checkers {
-  val rover = Pet(Some(0), "Rover", Nil, Option(Category(1, "dog")), Option(Seq(Tag(1, "puppy"),
+  val rover = Pet(None, "Rover", Nil, Option(Category(1, "dog")), Option(Seq(Tag(1, "puppy"),
     Tag(2, "white"))), Option(Available))
   val jack = Pet(None, "Jack", Nil, Option(Category(1, "dog")), Option(Seq(Tag(1, "puppy"))),
     Option(Available))
@@ -38,14 +38,16 @@ class PetstoreDbSpec extends FlatSpec with Matchers with Checkers {
   //GET: getPet
 
   "The Petstore DB" should "allow pet lookup by id" in new DbContext {
-    assert(Await.result(db.getPet(0)) === rover)
+    assert(Await.result(db.getPet(0)) === rover.copy(id = Some(0)))
   }
 
   //POST: add pet
   it should "allow adding pets" in new DbContext {
     check { (pet: Pet) =>
+      val petInput = pet.copy(id = None)
+
       val result = for {
-        petId <- db.addPet(pet)
+        petId <- db.addPet(petInput)
         newPet <- db.getPet(petId)
       } yield newPet === pet.copy(id = Some(petId))
 
