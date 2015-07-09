@@ -97,6 +97,19 @@ class PetstoreDbSpec extends FlatSpec with Matchers with Checkers {
     }
   }
 
+  //GET: find pets by tags
+  it should "find pets by tags" in new DbContext{
+    val puppies = Await.result(db.findPetsByTag(Seq("puppy")))
+
+    puppies shouldBe Seq(rover.copy(id = Some(0)), jack.copy(id = Some(1)))
+  }
+
+  it should "find pets by multiple tags" in new DbContext{
+    val puppies = Await.result(db.findPetsByTag(Seq("puppy", "white")))
+
+    puppies shouldBe Seq(rover.copy(id = Some(0)))
+  }
+
   //DELETE: Delete pets from the database
   it should "allow the deletion of existing pets from the database" in new DbContext{
     val sadPet = Pet(None, "Blue", Nil, Option(Category(1, "dog")), Option(Nil), Option(Available))
@@ -133,28 +146,105 @@ class PetstoreDbSpec extends FlatSpec with Matchers with Checkers {
     p = Await.result(db.getPet(0))
     assert(if (p.name.equals("Clifford")) true else false)
     assert(if (p.status == Option(Available)) true else false)
+
+    db.updatePetViaForm(0, Option("Rover"), Option(Available)) //reset for other tests
   }
 
-
-
-  //GET: find pets by tags
-  it should "find pets by tags" in new DbContext{
-    val puppies = Await.result(db.findPetsByTag(Seq("puppy")))
-
-    puppies shouldBe Seq(rover.copy(id = Some(0)), jack.copy(id = Some(1)))
+  //POST: Upload image
+  it should "be able to upload images of pets" in new DbContext{
+    /*
+   ======  ===    ||====     ===
+     ||  ||   ||  ||    || ||   ||
+     ||  ||   ||  ||    || ||   ||
+     ||    ===    ||====     ====
+    */
   }
+  //============================PET TESTS END HERE================================================
 
-  it should "find pets by multiple tags" in new DbContext{
-    val puppies = Await.result(db.findPetsByTag(Seq("puppy", "white")))
-
-    puppies shouldBe Seq(rover.copy(id = Some(0)))
-  }
-
+  //+++++++++++++++++++++++++++++STORE TESTS BEGIN HERE+++++++++++++++++++++++++++++++++++++++++
   //GET: returns the current inventory
   it should "return status counts" in new DbContext{
     val statuses = Await.result(db.getInventory)
-
     statuses shouldBe Map(Available -> 5, Pending -> 2, Adopted -> 2)
   }
+
+  //POST: Place an order for a pet
+  it should "place pet orders" in new DbContext{
+    val mouseCircusOrder: Order = Order(None, Some(4), Some(100), Some("2015-07-01T17:36:58.190Z"), Option(Placed), Option(false))
+    val idFuture: Future[Long] = db.addOrder(mouseCircusOrder)
+    val success: Future[Boolean] = for{
+      id <- idFuture
+      o <- db.findOrder(id)
+    } yield o.equals(mouseCircusOrder.copy(id = Option(id)))
+    Await.result(success)
+  }
+
+  //DELETE: Delete purchase order by ID
+  it should "be able to delete orders by ID" in new DbContext{
+    val catOrder: Order = Order(None, Some(8), Some(100), Some("2015-07-01T17:36:58.190Z"), Option(Placed), Option(false))
+    val idFuture: Future[Long] = db.addOrder(catOrder)
+    val success: Future[Boolean] = for{
+      id <- idFuture
+    } yield Await.result(db.deleteOrder(id))
+    Await.result(success)
+
+    //For non-existent orders...
+    assert(!Await.result(db.deleteOrder(100)))
+  }
+
+  //GET: Find purchase order by ID
+  it should "be able to find an order by its ID" in new DbContext{
+    val catOrder: Order = Order(None, Some(8), Some(100), Some("2015-07-01T17:36:58.190Z"), Option(Placed), Option(false))
+    val idFuture: Future[Long] = db.addOrder(catOrder)
+    val retOrder: Future[Order] = db.findOrder(Await.result(idFuture))
+    assert(Await.result(retOrder).equals(catOrder.copy(id = Option(Await.result(idFuture)))))
+  }
+
+  //============================STORE TESTS END HERE================================================
+
+  //+++++++++++++++++++++++++++++USER TESTS BEGIN HERE+++++++++++++++++++++++++++++++++++++++++
+
+  //POST: Create user
+  it should "be able to add new users" in new DbContext{
+    val pirateKing: User = User(None, "pirateKing", Some("Elizabeth"), Some("Swan"), Some("eswan@potc.com"),
+      "hoistTheColours", None)
+    //NOT FINISHED!!!!!!!
+  }
+
+  //POST: Create list of users with given input array
+
+  //POST: Create list of users with given input list
+
+  //GET: Logs user into system
+  /*
+   ======  ===    ||====     ===
+     ||  ||   ||  ||    || ||   ||
+     ||  ||   ||  ||    || ||   ||
+     ||    ===    ||====     ====
+    */
+
+  //GET: Logs out current logged in user session
+  /*
+   ======  ===    ||====     ===
+     ||  ||   ||  ||    || ||   ||
+     ||  ||   ||  ||    || ||   ||
+     ||    ===    ||====     ====
+    */
+
+  //DELETE: Delete user
+  /*
+   ======  ===    ||====     ===
+     ||  ||   ||  ||    || ||   ||
+     ||  ||   ||  ||    || ||   ||
+     ||    ===    ||====     ====
+    */
+
+  //GET: Get user by username, assume all usernames are unique
+
+  //PUT: Update user
+  //PUT: Update user
+
+
+  //============================USER TESTS END HERE================================================
 
 }

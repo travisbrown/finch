@@ -45,15 +45,17 @@ class PetstoreDb {
 
   //Helper Method: Adds tag to tag map
 
-  def addTag(inputTag: Tag): Future[Tag] = Future.value(
+  def addTag(inputTag: Tag): Future[Tag] =
     tags.synchronized {
-      val genId = if (tags.isEmpty) 0 else tags.keys.max + 1
-      val inputId: Long = inputTag.id
-      val realId: Long = if (tags.contains(inputId)) genId else inputId
-      tags(realId) = inputTag.copy(id = realId)
-      inputTag
+      inputTag.id match{
+        case x: Long => Future.exception(InvalidInput("New tag should not contain an id"))
+        case _ => tags.synchronized{
+          val genId = if (tags.isEmpty) 0 else tags.keys.max + 1
+          tags(genId) = inputTag.copy(id = genId)
+          Future(tags(genId))
+        }
+      }
     }
-  )
 
   //POST: Add pet
 
@@ -171,17 +173,17 @@ class PetstoreDb {
   )
 
   //POST: Place an order for a pet
-  def addOrder(order: Order): Future[Order] = Future.value(
-    orders.synchronized{
-      val genId = if (orders.isEmpty) 0 else orders.keys.max + 1
-      val inputId: Option[Long] = order.id
-      val realId: Long = if (inputId != None) {
-        if (order.id == inputId) genId else inputId.getOrElse(genId) //repetition guard
-      } else genId
-      orders(realId) = order.copy(id = Option(realId))
-      orders(realId)
+  def addOrder(order: Order): Future[Long] =
+    orders.synchronized {
+      order.id match{
+        case Some(_) => Future.exception(InvalidInput("New order should not contain an id"))
+        case None => orders.synchronized{
+          val genId = if (orders.isEmpty) 0 else orders.keys.max + 1
+          orders(genId) = order.copy(id = Option(genId))
+          Future(genId)
+        }
+      }
     }
-  )
 
   //DELETE: Delete purchase order by ID
   def deleteOrder(id: Long): Future[Boolean] = Future.value(
@@ -205,17 +207,17 @@ class PetstoreDb {
   //+++++++++++++++++++++++++++++USER METHODS BEGIN HERE+++++++++++++++++++++++++++++++++++++++++
 
   //POST: Create user
-  def addUser(newGuy: User): Future[User] = Future.value(
+  def addUser(newGuy: User): Future[Long] =
     users.synchronized {
-      val genId = if (users.isEmpty) 0 else users.keys.max + 1
-      val inputId: Option[ Long ] = newGuy.id
-      val realId: Long = if (inputId != None) {
-        if (newGuy.id == inputId) genId else inputId.getOrElse(genId) //repetition guard
-      } else genId
-      users(realId) = newGuy.copy(id = Some(realId))
-      users(realId)
+      newGuy.id match{
+        case Some(_) => Future.exception(InvalidInput("New user should not contain an id"))
+        case None => users.synchronized{
+          val genId = if (users.isEmpty) 0 else users.keys.max + 1
+          users(genId) = newGuy.copy(id = Option(genId))
+          Future(genId)
+        }
+      }
     }
-  )
 
   //POST: Create list of users with given input array
   //In: List of user objects

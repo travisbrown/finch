@@ -78,7 +78,7 @@ object endpoint{
     db.getInventory
   }
 
-  def addOrderEndpt(db: PetstoreDb): Router[RequestReader[Order]] = Post / "store" / "order" /> {
+  def addOrderEndpt(db: PetstoreDb): Router[RequestReader[Long]] = Post / "store" / "order" /> {
     body.as[Order].embedFlatMap{order =>
       db.addOrder(order)
     }
@@ -96,7 +96,7 @@ object endpoint{
 
   //+++++++++++++++USER ENDPOINTS+++++++++++++++++++++++++++++++++++++++++++
 
-  def addUserEndpt(db: PetstoreDb): Router[RequestReader[User]] = Post / "user" /> {
+  def addUserEndpt(db: PetstoreDb): Router[RequestReader[Long]] = Post / "user" /> {
     body.as[User].embedFlatMap{newUser =>
       db.addUser(newUser)
     }
