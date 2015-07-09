@@ -206,14 +206,39 @@ class PetstoreDbSpec extends FlatSpec with Matchers with Checkers {
 
   //POST: Create user
   it should "be able to add new users" in new DbContext{
-    val pirateKing: User = User(None, "pirateKing", Some("Elizabeth"), Some("Swan"), Some("eswan@potc.com"),
-      "hoistTheColours", None)
-    //NOT FINISHED!!!!!!!
+    check{(u: User) =>
+      val genId: Future[Long] = db.addUser(u)
+      assert(Await.result(db.getUser(u.username)) == u.copy(id = Option(Await.result(genId))))
+    }
+//    val eSwan: User = User(None, "pirateKing", Some("Elizabeth"), Some("Swan"), Some("eswan@potc.com"),
+//      "hoistTheColours", None)
+//    val genId: Future[Long] = db.addUser(eSwan)
+//    assert(Await.result(db.getUser(eSwan.username)) == eSwan.copy(id = Option(Await.result(genId))))
   }
 
   //POST: Create list of users with given input array
+  it should "be able to create a list of users from an input array" in new DbContext {
+//    check{(u: User) =>
+//
+//    }
+
+
+    val eSwan: User = User(None, "pirateKing", Some("Elizabeth"), Some("Swan"), Some("eswan@potc.com"),
+      "hoistTheColours", None)
+    val jSparrow: User = User(None, "captain", Some("Jack"), Some("Sparrow"), Some("savvy@potc.com"),
+      "blackpearl", None)
+    db.addUsersViaArray(Seq(eSwan, jSparrow))
+    val getSwan: Future[User] = db.getUser(eSwan.username)
+    val swanId: Option[Long] = Await.result(getSwan).id
+    assert(Await.result(getSwan) == eSwan.copy(id = swanId))
+
+    val getSparrow: Future[User] = db.getUser(jSparrow.username)
+    val sparrowId: Option[Long] = Await.result(getSparrow).id
+    assert(Await.result(getSparrow) == jSparrow.copy(id = sparrowId))
+  }
 
   //POST: Create list of users with given input list
+  //Same test as above, replace when above gets fixed
 
   //GET: Logs user into system
   /*
@@ -240,10 +265,19 @@ class PetstoreDbSpec extends FlatSpec with Matchers with Checkers {
     */
 
   //GET: Get user by username, assume all usernames are unique
+  it should "facillitate searching for users vis username" in new DbContext{
+    val eSwan: User = User(None, "pirateKing", Some("Elizabeth"), Some("Swan"), Some("eswan@potc.com"),
+      "hoistTheColours", None)
+    db.addUser(eSwan)
+    assert(Await.result(db.getUser("pirateKing")).equals(eSwan))
+  }
 
   //PUT: Update user
-  //PUT: Update user
-
+  it should "allow the updating of existing users" in new DbContext{
+    val eSwan: User = User(None, "eSwan", Some("Elizabeth"), Some("Swan"), Some("eswan@potc.com"),
+      "hoistTheColours", None)
+    assert(Await.result(db.updateUser(eSwan)) == eSwan)
+  }
 
   //============================USER TESTS END HERE================================================
 
