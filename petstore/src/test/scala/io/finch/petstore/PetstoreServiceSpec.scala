@@ -21,7 +21,7 @@ trait PetstoreServiceSuite { this: FlatSpec with ServiceSuite with Matchers =>
     db.addPet(Pet(None, "Crookshanks", Nil, Some(Category(1, "cat")), Some(Nil), Some(Available)))
 
     // Add your endpoint here
-    (updatePetEndpt(db) :+: getPetEndpt(db) :+: uploadImageEndpt(db)).toService
+    (updatePetEndpt(db) :+: getPetEndpt(db) :+: uploadImageEndpt(db) :+: addUsersViaList(db)).toService
   }
 
   "The petstore app" should "return valid pets" in { f =>
@@ -38,6 +38,7 @@ trait PetstoreServiceSuite { this: FlatSpec with ServiceSuite with Matchers =>
     result.statusCode shouldBe 200
   }
 
+  //Add image
   it should "accept file uploads" in { f =>
     val imageDataStream = getClass.getResourceAsStream("/doge.jpg")
 
@@ -53,6 +54,33 @@ trait PetstoreServiceSuite { this: FlatSpec with ServiceSuite with Matchers =>
 
     result.statusCode shouldBe 200
   }
+
+  it should "be able to add an array of users" in {f =>
+//    val request = Request("/user/createWithList")
+    val request: Request = RequestBuilder()
+      .url("http://localhost:8080/user/createWithList").buildPost(
+          Buf.Utf8(s"""
+               |[
+               |  {
+               |    "username": "strawberry",
+               |    "firstName": "Gintoki",
+               |    "lastName": "Sakata",
+               |    "email": "yorozuya@ygc.com",
+               |    "password": "independenceDei"
+               |  }
+               |]
+             """.stripMargin)
+        )
+    val result: Response = f(request)
+
+    result.statusCode shouldBe 200
+
+  }
+
+//  it should "be able to add a list of users" in {
+//
+//  }
+
 }
 
 class PetstoreServiceSpec extends FlatSpec with ServiceSuite with PetstoreServiceSuite with Matchers

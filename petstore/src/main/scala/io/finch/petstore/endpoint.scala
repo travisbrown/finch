@@ -7,10 +7,6 @@ import io.finch.request._
 import io.finch.route._
 
 object endpoint{
-  //body.as[Pet]: RequestReader[Pet]
-  //body.as[Pet].flatMap { pet => param("petId") }: RequestReader[String]
-  //body.as[Pet].embedFlatMap { pet => Future(pet.id) }: RequestReader[Long]
-
   //+++++++++++++++PET ENDPOINTS+++++++++++++++++++++++++++++++++++++++++++
   def getPetEndpt(db: PetstoreDb): Router[Future[Pet]] = Get / "pet" / long /> {petId: Long =>
     db.getPet(petId)
@@ -96,7 +92,7 @@ object endpoint{
 
   //+++++++++++++++USER ENDPOINTS+++++++++++++++++++++++++++++++++++++++++++
 
-  def addUserEndpt(db: PetstoreDb): Router[RequestReader[Long]] = Post / "user" /> {
+  def addUserEndpt(db: PetstoreDb): Router[RequestReader[String]] = Post / "user" /> {
     body.as[User].embedFlatMap{newUser =>
       db.addUser(newUser)
     }
@@ -104,13 +100,13 @@ object endpoint{
 
   def addUsersViaList(db: PetstoreDb): Router[RequestReader[Seq[String]]] = Post / "user" / "createWithList" /> {
     body.as[Seq[User]].embedFlatMap{uList =>
-      db.addUsersViaList(uList)
+      Future.collect(uList.map(db.addUser))
     }
   }
 
   def addUsersViaArray(db: PetstoreDb): Router[RequestReader[Seq[String]]] = Post / "user" / "createWithArray" /> {
-    body.as[Seq[User]].embedFlatMap { uList =>
-      db.addUsersViaArray(uList)
+    body.as[Seq[User]].embedFlatMap{uList =>
+      Future.collect(uList.map(db.addUser))
     }
   }
 

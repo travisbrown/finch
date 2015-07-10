@@ -35,11 +35,10 @@ class StatusSpec extends FlatSpec with Matchers with Checkers {
     Parse.decodeOption[Status]("available") === Available
     Parse.decodeOption[Status]("pending") === Pending
     Parse.decodeOption[Status]("adopted") === Adopted
-    Parse.decodeOption[Status]("") ===
+    Parse.decodeOption[Status]("") === None
     check{(randString: String) =>
       (!List("available", "pending", "adopted)").contains(randString)) ==> {
         Parse.decodeOption[Status](randString) === None
-//        Parse.decodeOption[Status](randString) === s"Unknown status: $randString"
       }
     }
   }
@@ -67,7 +66,7 @@ class CategorySpec extends FlatSpec with Matchers with Checkers {
     }
   }
 
-  it should "round-trip Category" in { //Is this encoding? yes.
+  it should "round-trip Category" in {
     check{cat: Category =>
       Parse.decodeOption[Category](cat.asJson.nospaces) === Some(cat)
     }
@@ -93,3 +92,65 @@ class TagSpec extends FlatSpec with Matchers with Checkers{
     }
   }
  }
+
+/*
+Tests for OrderStatus
+ */
+class OrderStatusSpec extends FlatSpec with Matchers with Checkers{
+  "The OrderStatus codec" should "correctly fail to decode irrelevant JSON" in {
+    Parse.decodeOption[OrderStatus]("placed") === Placed
+    Parse.decodeOption[OrderStatus]("approved") === Approved
+    Parse.decodeOption[OrderStatus]("delivered") === Delivered
+    Parse.decodeOption[OrderStatus]("") === None
+      check{(randString: String) =>
+        (!List("placed", "approved", "delivered").contains(randString)) ==> {
+          Parse.decodeOption[OrderStatus](randString) === None
+        }
+      }
+  }
+
+  it should "correctly encode OrderStatus objects" in {
+    check{ordStat: OrderStatus =>
+      Parse.decodeOption[OrderStatus](ordStat.asJson.nospaces) === Some(ordStat)
+    }
+  }
+}
+
+/*
+Tests for Order
+ */
+class OrderSpec extends FlatSpec with Matchers with Checkers{
+
+  "The Order codec" should "correctly decode JSON to Order" in {
+    check{ order: Order =>
+      val json = order.asJson.toString
+      Parse.decodeOption[Order](json) === Some(order)
+    }
+  }
+
+  it should "correctly encode an Order to JSON" in {
+    check{ order: Order =>
+      Parse.decodeOption[Order](order.asJson.nospaces) === Some(order)
+    }
+  }
+}
+
+/*
+Tests for User
+ */
+class UserSpec extends FlatSpec with Matchers with Checkers{
+
+  "The User codec" should "correctly decode JSON to User" in {
+    check { u: User =>
+      val json = u.asJson.toString
+      Parse.decodeOption[ User ](json) === Some(u)
+    }
+  }
+
+  it should "correctly encode a User to JSON" in {
+    check{ u: User =>
+      Parse.decodeOption[User](u.asJson.nospaces) === Some(u)
+    }
+  }
+}
+

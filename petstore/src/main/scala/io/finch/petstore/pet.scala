@@ -84,41 +84,11 @@ TAG THINGS BEGIN HERE+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 case class Tag(id: Long, name: String)
 
 object Tag {
-//  val tagDecode: DecodeJson[Tag] =
-//    DecodeJson {t =>
-//      t.as[String].flatMap[Tag] {
-//        case """""" => DecodeResult.fail("""Unknown tag: " """, t.history)
-//        case """\""" => DecodeResult.fail("""Unknown tag: \""", t.history)
-//        case """/""" => DecodeResult.fail("""Unknown tag: /""", t.history)
-//        case x => DecodeResult.ok(Tag())
-//      }
-//    }
-  // Alternative way to validate:
-  // val validatingTagReader = bodyReader.shouldNot("contain backslash")(_.name.contains("\\"))
-
   implicit val tagCodec: CodecJson[Tag] =
     casecodec2(Tag.apply, Tag.unapply)("id", "name")
 }
 /*
 TAG THINGS END HERE========================================================
- */
-
-
-/*
-UPLOAD THINGS BEGIN HERE+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- */
-case class UploadResponse(
-    code: Long,
-    responseType: String,
-    message: String
-    )
-
-object UploadResponse {
-  implicit val uploadResponseCodec: CodecJson[UploadResponse] =
-    casecodec3(UploadResponse.apply, UploadResponse.unapply)("code", "type", "message")
-}
-/*
-UPLOAD THINGS END HERE========================================================
  */
 
 /*
@@ -211,3 +181,4 @@ object User{
 /*
 USER THINGS END HERE========================================================
  */
+
