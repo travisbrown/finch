@@ -102,13 +102,13 @@ object endpoint{
     }
   }
 
-  def addUsersViaList(db: PetstoreDb): Router[RequestReader[Seq[User]]] = Post / "user" / "createWithList" /> {
+  def addUsersViaList(db: PetstoreDb): Router[RequestReader[Seq[String]]] = Post / "user" / "createWithList" /> {
     body.as[Seq[User]].embedFlatMap{uList =>
       db.addUsersViaList(uList)
     }
   }
 
-  def addUsersViaArray(db: PetstoreDb): Router[RequestReader[Seq[User]]] = Post / "user" / "createWithArray" /> {
+  def addUsersViaArray(db: PetstoreDb): Router[RequestReader[Seq[String]]] = Post / "user" / "createWithArray" /> {
     body.as[Seq[User]].embedFlatMap { uList =>
       db.addUsersViaArray(uList)
     }

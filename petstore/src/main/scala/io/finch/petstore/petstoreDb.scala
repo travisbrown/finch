@@ -209,27 +209,48 @@ class PetstoreDb {
   //POST: Create user
   def addUser(newGuy: User): Future[Long] =
     users.synchronized {
-      newGuy.id match{
-        case Some(_) => Future.exception(InvalidInput("New user should not contain an id"))
-        case None => users.synchronized{
-          val genId = if (users.isEmpty) 0 else users.keys.max + 1
-          users(genId) = newGuy.copy(id = Option(genId))
-          Future(genId)
+      val inputName: String = newGuy.username
+      if(users.values.exists(_.username == inputName)) throw RedundantUsername(s"Username $inputName is already taken.")
+      else{
+        newGuy.id match{
+          case Some(_) => Future.exception(InvalidInput("New user should not contain an id"))
+          case None => users.synchronized{
+            val genId = if (users.isEmpty) 0 else users.keys.max + 1
+            users(genId) = newGuy.copy(id = Option(genId))
+            Future(genId)
+          }
         }
       }
     }
 
   //POST: Create list of users with given input array
   //In: List of user objects
-  def addUsersViaArray(addAll: Seq[User]): Future[Seq[User]] = {
-    addAll.map(addUser(_))
-    Future.value(addAll)
+  def addUsersViaArray(addAll: Seq[User]): Future[Seq[String]] = {
+    val added: Seq[Future[Long]] = addAll.map(addUser(_))
+    val allNames: Seq[String] = addAll.map(_.username)
+    Future.value(allNames)
+//    val allIds: Seq[Long] = for{
+//      item: Future[Long] <- added
+//      num: Long <- item
+//    } yield num
+//    Future.value(allIds)
   }
 
   //POST: Create list of users with given input list
-  def addUsersViaList(addAll: Seq[User]): Future[Seq[User]] = {
-    addAll.map(addUser(_))
-    Future.value(addAll)
+  def addUsersViaList(addAll: Seq[User]): Future[Seq[String]] = {
+//    addAll.map(addUser(_))
+//    Future.value(addAll)
+
+//    val added: Seq[Future[Long]] = addAll.map(addUser(_))
+//    val allIds: Seq[Long] = for{
+//      item: Future[Long] <- added
+//      num: Long <- item
+//    } yield num
+//    Future.value(allIds)
+
+    val added: Seq[Future[Long]] = addAll.map(addUser(_))
+    val allNames: Seq[String] = addAll.map(_.username)
+    Future.value(allNames)
   }
 
   //GET: Logs user into system
@@ -263,20 +284,25 @@ class PetstoreDb {
         u <- users.values
         if u.username.equals(name)
       } yield u
-      if(pickMeIter.toSeq.length > 1) Future.exception(RedundantUsername("Two users can't have the same username. " +
-          "Something's wrong!"))
-      pickMeIter.toSeq.head
+//      pickMeIter.toSeq.take(1)
+      if (pickMeIter.size == 0) throw MissingUser("This user doesn't exist!")  else pickMeIter.toSeq(0)
     }
   )
 
+  //Helper method for testing
+  def userExists(name: String): Future[Boolean] = Future.value(
+    if (users.values.count(_.username == name) == 1) true else false
+  )
+
   //PUT: Update user
+  //You CANNOT change the username, this is how we find the original user to modify
   def updateUser(betterUser: User): Future[User] = Future.value(
     users.synchronized{
-      val id: Long = betterUser.id.getOrElse(-1)
-      if(users.contains(id)){
-        users(id) = betterUser
-      }
-      users(id)
+      val realId: Long = Await.result(getUser(betterUser.username)).id.getOrElse(throw MissingIdentifier("This user doesn't have an id."))
+//      if(users.contains(realId)){
+      users(realId) = betterUser.copy(id = Some(realId))
+//      }
+      users(realId)
     }
   )
 
