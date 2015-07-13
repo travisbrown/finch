@@ -128,9 +128,13 @@ object endpoint{
    * @param db The petstore database.
    * @return A Router that contains a RequestReader of a Map reflecting the inventory.
    */
-  def getInventoryEndpt(db: PetstoreDb): Router[Future[Map[Status, Int]]] = Get / "store" / "inventory" /> {
+  def getInventoryEndpt(db: PetstoreDb): Router[Future[Inventory]] = Get / "store" / "inventory" /> {
     db.getInventory
   }
+
+  //  def getInventoryEndpt(db: PetstoreDb): Router[Future[Map[Status, Int]]] = Get / "store" / "inventory" /> {
+//    db.getInventory
+//  }
 
   /**
    * Endpoint for the addOrder service method.

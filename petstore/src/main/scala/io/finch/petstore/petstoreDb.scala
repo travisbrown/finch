@@ -187,12 +187,16 @@ class PetstoreDb {
    * GET: Returns the current inventory.
    * @return A map of how many pets currently correspond to which Status type.
    */
-  def getInventory: Future[Map[Status, Int]] = Future.value(
+  def getInventory: Future[Inventory] = Future.value(
     pets.synchronized {
-      pets.groupBy(_._2.status).flatMap {
+      val stock: Map[Status, Int] = pets.groupBy(_._2.status).flatMap {
         case (Some(status), keyVal) => Some(status -> keyVal.size)
         case (None, _) => None
       }
+      val available: Int = stock(Available)
+      val pending: Int = stock(Pending)
+      val adopted: Int = stock(Adopted)
+      Inventory(available, pending, adopted)
     }
   )
 

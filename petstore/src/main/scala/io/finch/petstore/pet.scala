@@ -175,6 +175,59 @@ TAG THINGS END HERE========================================================
  */
 
 /*
+INVENTORY BEGIN HERE+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ */
+
+//case class Inventory(
+//    stock: Map[Status, Int]
+//    )
+case class Inventory(available: Int, pending: Int, adopted: Int)
+
+/**
+ * Provides a codec for encoding and decoding Order objects.
+ */
+object Inventory {
+  /**
+   * Encoding method that takes a Status and returns the corresponding string value in JSON.
+   */
+  val inventoryEncode: EncodeJson[Inventory] =
+    jencode3L((i:Inventory) => (i.available, i.pending, i.adopted))("available", "pending", "adopted")
+//    EncodeJson((i: Inventory) =>
+  //      ("available" := i.available) ->: ("pending" := i.pending) ->: ("adopted" := i.adopted) ->: jEmptyObject
+  //    )
+
+  /**
+   * Decoding method that takes JSON and gives back its corresponding Status.
+   * If the given string is not one of the three valid statuses, the system will fail.
+   */
+//  val statusDecode: DecodeJson[Status] =
+//    DecodeJson { c =>
+//      c.as[String].flatMap[Status] {
+//        case "available" => DecodeResult.ok(Available)
+//        case "pending" => DecodeResult.ok(Pending)
+//        case "adopted" => DecodeResult.ok(Adopted)
+//        case other => DecodeResult.fail(s"Unknown status: $other", c.history)
+//      }
+//    }
+
+  implicit val inventoryCodec: CodecJson[Inventory] =
+    CodecJson(
+      (i: Inventory) =>
+        ("available" := i.available) ->: ("pending" := i.pending) ->: ("adopted" := i.adopted) ->:
+        jEmptyObject,
+      c => for {
+        available <- (c --\ "available").as[Int]
+        pending <- (c --\ "pending").as[Int]
+        adopted <- (c --\ "adopted").as[Int]
+      } yield Inventory(available, pending, adopted))
+//  implicit val inventoryCodec: CodecJson[Inventory] =
+//    casecodec3(inventoryEncode, Inventory.unapply)("available", "pending", "adopted")
+}
+/*
+INVENTORY END HERE========================================================
+ */
+
+/*
 ORDERSTATUS THINGS BEGIN HERE+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
 
@@ -302,6 +355,8 @@ object Order {
 /*
 ORDER THINGS END HERE========================================================
  */
+
+
 
 /*
 USER THINGS BEGIN HERE+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

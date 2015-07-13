@@ -165,7 +165,10 @@ class PetstoreDbSpec extends FlatSpec with Matchers with Checkers {
   //GET: returns the current inventory
   it should "return status counts" in new DbContext{
     val statuses = Await.result(db.getInventory)
-    statuses shouldBe Map(Available -> 5, Pending -> 2, Adopted -> 2)
+    assert(statuses.available === 5)
+    assert(statuses.pending === 2)
+    assert(statuses.adopted === 2)
+//    statuses shouldBe Map(Available -> 5, Pending -> 2, Adopted -> 2)
   }
 
   //POST: Place an order for a pet
