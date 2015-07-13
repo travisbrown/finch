@@ -14,7 +14,7 @@ package object petstore {
     for {
       id <- arbitrary[Long]
       name <- Gen.alphaStr
-    } yield Category(id, name)
+    } yield Category(Option(id), name)
   )
 
   implicit val tagArbitrary: Arbitrary[Tag] = Arbitrary(

@@ -13,17 +13,23 @@ import org.scalatest.fixture.FlatSpec
 trait PetstoreServiceSuite { this: FlatSpec with ServiceSuite with Matchers =>
   def createService(): Service[Request, Response] = {
     val db = new PetstoreDb()
-    db.addPet(Pet(None, "Sadaharu", Nil, Some(Category(1, "inugami")), Some(Nil), Some(Available)))
-    db.addPet(Pet(None, "Despereaux", Nil, Some(Category(1, "mouse")), Some(Nil), Some(Available)))
-    db.addPet(Pet(None, "Alexander", Nil, Some(Category(1, "mouse")), Some(Nil), Some(Pending)))
-    db.addPet(Pet(None, "Wilbur", Nil, Some(Category(1, "pig")), Some(Nil), Some(Adopted)))
-    db.addPet(Pet(None, "Cheshire Cat", Nil, Some(Category(1, "cat")), Some(Nil), Some(Available)))
-    db.addPet(Pet(None, "Crookshanks", Nil, Some(Category(1, "cat")), Some(Nil), Some(Available)))
+    db.addPet(Pet(None, "Sadaharu", Nil, Some(Category(None, "inugami")), Some(Nil), Some(Available)))
+    db.addPet(Pet(None, "Despereaux", Nil, Some(Category(None, "mouse")), Some(Nil), Some(Available)))
+    db.addPet(Pet(None, "Alexander", Nil, Some(Category(None, "mouse")), Some(Nil), Some(Pending)))
+    db.addPet(Pet(None, "Wilbur", Nil, Some(Category(None, "pig")), Some(Nil), Some(Adopted)))
+    db.addPet(Pet(None, "Cheshire Cat", Nil, Some(Category(None, "cat")), Some(Nil), Some(Available)))
+    db.addPet(Pet(None, "Crookshanks", Nil, Some(Category(None, "cat")), Some(Nil), Some(Available)))
 
     // Add your endpoint here
-    (updatePetEndpt(db) :+: getPetEndpt(db) :+: uploadImageEndpt(db) :+: addUsersViaList(db)).toService
+//    (updatePetEndpt(db) :+: getPetEndpt(db) :+: uploadImageEndpt(db) :+: addUsersViaList(db)).toService
+
+//    def makeService(pdb: PetstoreDb) = (endpoint.petEndpts(pdb) :+: endpoint.storeEndpts(pdb) :+:
+//        endpoint.userEndpts(pdb)).toService
+
+    endpoint.makeService(db)
   }
 
+  //getPetEndpt test
   "The petstore app" should "return valid pets" in { f =>
     val request = Request("/pet/1")
     val result = f(request)
@@ -34,6 +40,25 @@ trait PetstoreServiceSuite { this: FlatSpec with ServiceSuite with Matchers =>
   it should "fail to return invalid pets" in { f =>
     val request = Request("/pet/2")
     val result = Await.result(f.service(request))
+
+    result.statusCode shouldBe 200
+  }
+
+  //addPetEndpt test
+  it should "add valid pets" in { f =>
+    val request: Request = RequestBuilder()
+      .url("http://localhost:8080/pet").buildPost(
+        Buf.Utf8(s"""
+           |  {
+           |    "name": "Ell",
+           |    "photoUrls":[],
+           |    "category":{"name":"Wyverary"},
+           |    "tags":[{"name":"Wyvern"}, {"name":"Library"}],
+           |    "status":"pending"
+           |  }
+           """.stripMargin)
+        )
+    val result: Response = f(request)
 
     result.statusCode shouldBe 200
   }

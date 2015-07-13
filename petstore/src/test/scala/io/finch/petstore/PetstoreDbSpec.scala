@@ -10,17 +10,17 @@ Tests for the PetstoreDb class methods
  */
 
 class PetstoreDbSpec extends FlatSpec with Matchers with Checkers {
-  val rover = Pet(None, "Rover", Nil, Option(Category(1, "dog")), Option(Seq(Tag(1, "puppy"),
+  val rover = Pet(None, "Rover", Nil, Option(Category(None, "dog")), Option(Seq(Tag(1, "puppy"),
     Tag(2, "white"))), Option(Available))
-  val jack = Pet(None, "Jack", Nil, Option(Category(1, "dog")), Option(Seq(Tag(1, "puppy"))),
+  val jack = Pet(None, "Jack", Nil, Option(Category(None, "dog")), Option(Seq(Tag(1, "puppy"))),
     Option(Available))
-  val sue = Pet(None, "Sue", Nil, Option(Category(1, "dog")), Option(Nil), Option(Adopted))
-  val sadaharu = Pet(None, "Sadaharu", Nil, Option(Category(1, "inugami")), Option(Nil), Option(Available))
-  val despereaux = Pet(None, "Despereaux", Nil, Option(Category(1, "mouse")), Option(Nil), Option(Pending))
-  val alexander = Pet(None, "Alexander", Nil, Option(Category(1, "mouse")), Option(Nil), Option(Pending))
-  val wilbur = Pet(None, "Wilbur", Nil, Option(Category(1, "pig")), Option(Nil), Option(Adopted))
-  val cheshire = Pet(None, "Cheshire Cat", Nil, Option(Category(1, "cat")), Option(Nil), Option(Available))
-  val crookshanks = Pet(None, "Crookshanks", Nil, Option(Category(1, "cat")), Option(Nil), Option(Available))
+  val sue = Pet(None, "Sue", Nil, Option(Category(None, "dog")), Option(Nil), Option(Adopted))
+  val sadaharu = Pet(None, "Sadaharu", Nil, Option(Category(None, "inugami")), Option(Nil), Option(Available))
+  val despereaux = Pet(None, "Despereaux", Nil, Option(Category(None, "mouse")), Option(Nil), Option(Pending))
+  val alexander = Pet(None, "Alexander", Nil, Option(Category(None, "mouse")), Option(Nil), Option(Pending))
+  val wilbur = Pet(None, "Wilbur", Nil, Option(Category(None, "pig")), Option(Nil), Option(Adopted))
+  val cheshire = Pet(None, "Cheshire Cat", Nil, Option(Category(None, "cat")), Option(Nil), Option(Available))
+  val crookshanks = Pet(None, "Crookshanks", Nil, Option(Category(None, "cat")), Option(Nil), Option(Available))
 
   trait DbContext {
     val db = new PetstoreDb()
@@ -123,7 +123,7 @@ class PetstoreDbSpec extends FlatSpec with Matchers with Checkers {
 
   //DELETE: Delete pets from the database
   it should "allow the deletion of existing pets from the database" in new DbContext{
-    val sadPet = Pet(None, "Blue", Nil, Option(Category(1, "dog")), Option(Nil), Option(Available))
+    val sadPet = Pet(None, "Blue", Nil, Option(Category(None, "dog")), Option(Nil), Option(Available))
     val genId: Long = Await.result(db.addPet(sadPet))
 
     val success: Future[Boolean] = db.deletePet(genId) //There WILL be an ID
@@ -131,9 +131,9 @@ class PetstoreDbSpec extends FlatSpec with Matchers with Checkers {
   }
 
   it should "fail appropriately if user tries to delete a nonexistant pet" in new DbContext{
-    val ghostPet1 = Pet(Option(10), "Teru", Nil, Option(Category(1, "dog")), Option(Nil), Option(Available))
+    val ghostPet1 = Pet(Option(10), "Teru", Nil, Option(Category(None, "dog")), Option(Nil), Option(Available))
     assert(!Await.result(db.deletePet(ghostPet1.id.getOrElse(-1))))
-    val ghostPet2 = Pet(None, "Bozu", Nil, Option(Category(1, "dog")), Option(Nil), Option(Available))
+    val ghostPet2 = Pet(None, "Bozu", Nil, Option(Category(None, "dog")), Option(Nil), Option(Available))
     assert(!Await.result(db.deletePet(ghostPet2.id.getOrElse(-1)))) //Used getOrElse(-1) for endpoints later
   }
 

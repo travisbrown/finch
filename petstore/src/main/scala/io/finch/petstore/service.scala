@@ -11,17 +11,17 @@ import io.finch.petstore.endpoint._
  */
 class PetstoreApp {
   val db = new PetstoreDb()
-  db.addPet(Pet(None, "Sadaharu", Nil, Some(Category(1, "inugami")), Some(Nil), Some(Available)))
-  db.addPet(Pet(None, "Despereaux", Nil, Some(Category(1, "mouse")), Some(Nil), Some(Available)))
-  db.addPet(Pet(None, "Alexander", Nil, Some(Category(1, "mouse")), Some(Nil), Some(Pending)))
-  db.addPet(Pet(None, "Wilbur", Nil, Some(Category(1, "pig")), Some(Nil), Some(Adopted)))
-  db.addPet(Pet(None, "Cheshire Cat", Nil, Some(Category(1, "cat")), Some(Nil), Some(Available)))
-  db.addPet(Pet(None, "Crookshanks", Nil, Some(Category(1, "cat")), Some(Nil), Some(Available)))
+  db.addPet(Pet(None, "Sadaharu", Nil, Some(Category(None, "inugami")), Some(Nil), Some(Available)))
+  db.addPet(Pet(None, "Despereaux", Nil, Some(Category(None, "mouse")), Some(Nil), Some(Available)))
+  db.addPet(Pet(None, "Alexander", Nil, Some(Category(None, "mouse")), Some(Nil), Some(Pending)))
+  db.addPet(Pet(None, "Wilbur", Nil, Some(Category(None, "pig")), Some(Nil), Some(Adopted)))
+  db.addPet(Pet(None, "Cheshire Cat", Nil, Some(Category(None, "cat")), Some(Nil), Some(Available)))
+  db.addPet(Pet(None, "Crookshanks", Nil, Some(Category(None, "cat")), Some(Nil), Some(Available)))
 
-  def makeService(pdb: PetstoreDb) = (endpoint.petEndpts(pdb) :+: endpoint.storeEndpts(pdb) :+:
-      endpoint.userEndpts(pdb)).toService
+//  def makeService(pdb: PetstoreDb) = (endpoint.petEndpts(pdb) :+: endpoint.storeEndpts(pdb) :+:
+//      endpoint.userEndpts(pdb)).toService
 
-  val service = makeService(db)
+  val service = endpoint.makeService(db)
 
   val server = Httpx.serve(":8080", service) //creates service
 

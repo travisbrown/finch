@@ -62,7 +62,7 @@ class CategorySpec extends FlatSpec with Matchers with Checkers {
       (!name.contains(slash)) ==> {
         val json = s"""{ "id": $id, "name": "$name" }"""
 
-        Parse.decodeOption[Category](json) === Some(Category(id, name))
+        Parse.decodeOption[Category](json) === Some(Category(Option(id), name))
       }
     }
   }

@@ -1,8 +1,10 @@
 package io.finch.petstore
 
-import com.twitter.finagle.httpx.Response
+import com.twitter.finagle.Service
+import com.twitter.finagle.httpx.{Request, Response}
 import com.twitter.util.{Await, Future}
 import io.finch.argonaut._
+import io.finch.petstore.endpoint
 import io.finch.request._
 import io.finch.route._
 
@@ -11,15 +13,17 @@ import io.finch.route._
  */
 object endpoint{
 
-  def petEndpts(db: PetstoreDb) = getPetEndpt(db) :+: addPetEndpt(db) :+: updatePetEndpt(db) :+:
+  private def petEndpts(db: PetstoreDb) = getPetEndpt(db) :+: addPetEndpt(db) :+: updatePetEndpt(db) :+:
       getPetsByStatusEndpt(db) :+: findPetsByTagEndpt(db) :+: deletePetEndpt(db) :+: updatePetViaFormEndpt(db) :+:
       uploadImageEndpt(db)
 
-  def storeEndpts(db: PetstoreDb) = getInventoryEndpt(db) :+: addOrderEndpt(db) :+: deleteOrderEndpt(db) :+:
+  private def storeEndpts(db: PetstoreDb) = getInventoryEndpt(db) :+: addOrderEndpt(db) :+: deleteOrderEndpt(db) :+:
       findOrderEndpt(db)
 
-  def userEndpts(db: PetstoreDb) = addUserEndpt(db) :+: addUsersViaList(db) :+: addUsersViaArray(db) :+:
+  private def userEndpts(db: PetstoreDb) = addUserEndpt(db) :+: addUsersViaList(db) :+: addUsersViaArray(db) :+:
       getUserEndpt(db) :+: updateUserEndpt(db)
+
+  def makeService(db: PetstoreDb): Service[Request, Response] = (petEndpts(db) :+: storeEndpts(db) :+: userEndpts(db)).toService
 
 
   //+++++++++++++++PET ENDPOINTS+++++++++++++++++++++++++++++++++++++++++++
