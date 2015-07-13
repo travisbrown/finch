@@ -32,10 +32,11 @@ Tests for the Status class
 class StatusSpec extends FlatSpec with Matchers with Checkers {
 
   "The Status codec" should "correctly fail to decode irrelevant JSON" in {
-    Parse.decodeOption[Status]("available") === Available
-    Parse.decodeOption[Status]("pending") === Pending
-    Parse.decodeOption[Status]("adopted") === Adopted
-    Parse.decodeOption[Status]("") === None
+    Parse.decodeOption[Status]("\"available\"") shouldBe Some(Available)
+    Parse.decodeOption[Status]("\"pending\"") shouldBe Some(Pending)
+    Parse.decodeOption[Status]("\"adopted\"") shouldBe Some(Adopted)
+    Parse.decodeOption[Status]("") shouldBe None
+
     check{(randString: String) =>
       (!List("available", "pending", "adopted)").contains(randString)) ==> {
         Parse.decodeOption[Status](randString) === None

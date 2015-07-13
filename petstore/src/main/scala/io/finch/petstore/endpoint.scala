@@ -1,7 +1,7 @@
 package io.finch.petstore
 
 import com.twitter.finagle.httpx.Response
-import com.twitter.util.Future
+import com.twitter.util.{Await, Future}
 import io.finch.argonaut._
 import io.finch.request._
 import io.finch.route._
@@ -30,6 +30,10 @@ object endpoint{
       f
     }
     rr
+  }
+
+  def getAllPetsEndpt(db: PetstoreDb): Router[Seq[Pet]] = Get / "pet" / "all" /> {
+    Await.result(db.allPets)
   }
 
   def getPetsByStatusEndpt(db: PetstoreDb): Router[RequestReader[Seq[Pet]]] = Get / "pet" / "findByStatus" />{

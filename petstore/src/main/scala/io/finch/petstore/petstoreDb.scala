@@ -5,6 +5,10 @@ import com.twitter.util.{Await, Future}
 import scala.collection.mutable
 //import scala.concurrent.Await
 
+/**
+ * Provides a great majority of the service methods that allow Users to interact with the Pets in the
+ * store and to get information about them.
+ */
 class PetstoreDb {
   private[this] val pets = mutable.Map.empty[Long, Pet]
   private[this] val tags = mutable.Map.empty[Long, Tag]
@@ -23,6 +27,15 @@ class PetstoreDb {
     pets.synchronized {
       pets.getOrElse(id, throw MissingPet("Your pet doesn't exist! :("))
     }
+  )
+
+  /**
+   * Helper method for allPets: Allows us to check whether a given id is in the database.
+   * @param id The ID of the pet in question.
+   * @return true if it exists. false otherwise.
+   */
+  def petExists(id: Long): Future[Boolean] = Future(
+    pets.contains(id)
   )
 
   /**
@@ -64,14 +77,11 @@ class PetstoreDb {
       }
     }
 
-  //PUT: Update existing pet given a pet object
-  //@return: updated pet
-
   /**
    * PUT: Updates an existing [[Pet]], while validating that a current version of
    * the [[Pet]] exists (a.k.a. an existing [[Pet]] has the same id as inputPet).
    * @param inputPet The [[Pet]] we want to replace the current [[Pet]] with. Must be passed with an ID.
-   * @return
+   * @return The updated pet
    */
   def updatePet(inputPet: Pet): Future[Pet] = inputPet.id match {
     case Some(id) =>
@@ -85,8 +95,11 @@ class PetstoreDb {
     //    case None => Future.exception(MissingIdentifier(s"Missing id for pet: $inputPet"))
   }
 
-  //Helper Method: Get all the pets in the database
-  def allPets: Future[List[Pet]] = Future.value(
+  /**
+   * GET: Allows the user to get all the pets in the database.
+   * @return A sequence of all pets in the store.
+   */
+  def allPets: Future[Seq[Pet]] = Future.value(
     pets.synchronized(pets.toList.sortBy(_._1).map(_._2))
   )
 
