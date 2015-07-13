@@ -18,17 +18,10 @@ class PetstoreApp {
   db.addPet(Pet(None, "Cheshire Cat", Nil, Some(Category(1, "cat")), Some(Nil), Some(Available)))
   db.addPet(Pet(None, "Crookshanks", Nil, Some(Category(1, "cat")), Some(Nil), Some(Available)))
 
-  // val service = (getPetEndpt(db) :+: addPetEndpt(db) :+: updatePetEndpt(db) :+: getAllPetsEndpt(db) :+:
-  //     getPetsByStatusEndpt(db) :+: findPetsByTagEndpt(db) :+: deletePetEndpt(db) :+: updatePetViaFormEndpt(db) :+:
-  //     uploadImageEndpt(db) :+: getInventoryEndpt(db) :+: addOrderEndpt(db) :+: deleteOrderEndpt(db) :+:
-  //     findOrderEndpt(db) :+: addUserEndpt(db) :+: addUsersViaList(db) :+: addUsersViaArray(db) :+: getUserEndpt(db) :+:
-  //     updateUserEndpt(db)).toService
+  def makeService(pdb: PetstoreDb) = (endpoint.petEndpts(pdb) :+: endpoint.storeEndpts(pdb) :+:
+      endpoint.userEndpts(pdb)).toService
 
-  val service = (getPetEndpt(db) :+: addPetEndpt(db) :+: updatePetEndpt(db) :+: getAllPetsEndpt(db) :+: 
-    getPetsByStatusEndpt(db) :+: findPetsByTagEndpt(db) :+: deletePetEndpt(db) :+: updatePetViaFormEndpt(db) :+:
-    uploadImageEndpt(db) :+: getInventoryEndpt(db)).toService
-
-// val service = (updatePetEndpt(db) :+: getPetEndpt(db) :+: uploadImageEndpt(db) :+: addUsersViaList(db)).toService
+  val service = makeService(db)
 
   val server = Httpx.serve(":8080", service) //creates service
 

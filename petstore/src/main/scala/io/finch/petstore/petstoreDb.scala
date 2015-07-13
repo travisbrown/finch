@@ -96,10 +96,10 @@ class PetstoreDb {
   }
 
   /**
-   * GET: Allows the user to get all the pets in the database.
+   * Helper method: Allows the user to get all the pets in the database.
    * @return A sequence of all pets in the store.
    */
-  def allPets: Future[Seq[Pet]] = Future.value(
+  private def allPets: Future[Seq[Pet]] = Future.value(
     pets.synchronized(pets.toList.sortBy(_._1).map(_._2))
   )
 

@@ -10,6 +10,18 @@ import io.finch.route._
  * Provides the paths and endpoints for all the API's public service methods.
  */
 object endpoint{
+
+  def petEndpts(db: PetstoreDb) = getPetEndpt(db) :+: addPetEndpt(db) :+: updatePetEndpt(db) :+:
+      getPetsByStatusEndpt(db) :+: findPetsByTagEndpt(db) :+: deletePetEndpt(db) :+: updatePetViaFormEndpt(db) :+:
+      uploadImageEndpt(db)
+
+  def storeEndpts(db: PetstoreDb) = getInventoryEndpt(db) :+: addOrderEndpt(db) :+: deleteOrderEndpt(db) :+:
+      findOrderEndpt(db)
+
+  def userEndpts(db: PetstoreDb) = addUserEndpt(db) :+: addUsersViaList(db) :+: addUsersViaArray(db) :+:
+      getUserEndpt(db) :+: updateUserEndpt(db)
+
+
   //+++++++++++++++PET ENDPOINTS+++++++++++++++++++++++++++++++++++++++++++
   /**
    * Endpoint for the getPet service method.
@@ -51,14 +63,14 @@ object endpoint{
     rr
   }
 
-  /**
-   * Endpoint for the get allPets service method.
-   * @param db The petstore database.
-   * @return A Router that contains a sequence of all the Pets in the database.
-   */
-  def getAllPetsEndpt(db: PetstoreDb): Router[Seq[Pet]] = Get / "pet" / "all" /> {
-    Await.result(db.allPets)
-  }
+//  /**
+//   * Endpoint for the get allPets service method.
+//   * @param db The petstore database.
+//   * @return A Router that contains a sequence of all the Pets in the database.
+//   */
+//  def getAllPetsEndpt(db: PetstoreDb): Router[Seq[Pet]] = Get / "pet" / "all" /> {
+//    Await.result(db.allPets)
+//  }
 
   /**
    * Endpoint for the getPetsByStatus service method.

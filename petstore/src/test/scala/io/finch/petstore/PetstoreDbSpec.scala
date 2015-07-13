@@ -81,16 +81,16 @@ class PetstoreDbSpec extends FlatSpec with Matchers with Checkers {
     }
   }
 
-  //GET: find all pets
-  it should "allow the lookup of all pets" in new DbContext{
-    val allAnimals: Seq[Pet] = Await.result(db.allPets)
-    val containsAll: Seq[Future[Boolean]] = for{
-      p <- allAnimals
-      id <- p.id
-    } yield db.petExists(id)
-    val flatContainsAll: Seq[Boolean] = Await.result(Future.collect(containsAll))
-    !flatContainsAll.contains(false)
-  }
+//  //GET: find all pets
+//  it should "allow the lookup of all pets" in new DbContext{
+//    val allAnimals: Seq[Pet] = Await.result(db.allPets)
+//    val containsAll: Seq[Future[Boolean]] = for{
+//      p <- allAnimals
+//      id <- p.id
+//    } yield db.petExists(id)
+//    val flatContainsAll: Seq[Boolean] = Await.result(Future.collect(containsAll))
+//    !flatContainsAll.contains(false)
+//  }
 
   //GET: find pets by status
   it should "allow the lookup of pets by status" in new DbContext{
