@@ -59,7 +59,7 @@ class CategorySpec extends FlatSpec with Matchers with Checkers {
   "The Category codec" should "correctly decode JSON" in {
     val slash = """\"""
     check { (id: Long, name: String) =>
-      (!name.contains(slash)) ==> {
+      (!name.contains(slash) && name != "\"") ==> {
         val json = s"""{ "id": $id, "name": "$name" }"""
 
         Parse.decodeOption[Category](json) === Some(Category(Option(id), name))
@@ -71,11 +71,6 @@ class CategorySpec extends FlatSpec with Matchers with Checkers {
     check{cat: Category =>
       Parse.decodeOption[Category](cat.asJson.nospaces) === Some(cat)
     }
-  }
-
-  it should "correctly decode the case (id = 0, name = \")" in {
-    val json = s"""{ "id": 0, "name": \"}"""
-    assert(Parse.decodeOption[Category](json) == Some(Category(Option(0), "\"")))
   }
 }
 

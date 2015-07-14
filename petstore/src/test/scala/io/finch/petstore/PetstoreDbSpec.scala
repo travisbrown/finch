@@ -126,15 +126,15 @@ class PetstoreDbSpec extends FlatSpec with Matchers with Checkers {
     val sadPet = Pet(None, "Blue", Nil, Option(Category(None, "dog")), Option(Nil), Option(Available))
     val genId: Long = Await.result(db.addPet(sadPet))
 
-    val success: Future[Boolean] = db.deletePet(genId) //There WILL be an ID
-    assert(Await.result(success))
+    val success: Future[Unit] = db.deletePet(genId) //There WILL be an ID
+    Await.ready(success)
   }
 
   it should "fail appropriately if user tries to delete a nonexistant pet" in new DbContext{
     val ghostPet1 = Pet(Option(10), "Teru", Nil, Option(Category(None, "dog")), Option(Nil), Option(Available))
-    assert(!Await.result(db.deletePet(ghostPet1.id.getOrElse(-1))))
+    assert(Await.result(db.deletePet(ghostPet1.id.getOrElse(-1)).liftToTry).isThrow)
     val ghostPet2 = Pet(None, "Bozu", Nil, Option(Category(None, "dog")), Option(Nil), Option(Available))
-    assert(!Await.result(db.deletePet(ghostPet2.id.getOrElse(-1)))) //Used getOrElse(-1) for endpoints later
+    assert(Await.result(db.deletePet(ghostPet2.id.getOrElse(-1)).liftToTry).isThrow) //Used getOrElse(-1) for endpoints later
   }
 
   //POST: Update a pet in the store with form data

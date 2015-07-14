@@ -163,16 +163,15 @@ class PetstoreDb {
    * @param id The ID of the Pet to be deleted.
    * @return true if deletion was successful. false otherwise.
    */
-  def deletePet(id: Long): Future[Boolean] = Future.value(
+  def deletePet(id: Long): Future[Unit] = 
     pets.synchronized {
-      if (id == None) false else{
-        if (pets.contains(id)) {
-          pets.remove(id)
-          true
-        } else false
-      }
+      if (pets.contains(id)) {
+        pets.remove(id)
+        Future.Unit
+      } else Future.exception(
+        MissingPet(s"Pet with id $id does not exist and cannot be deleted")
+      )
     }
-  )
 
   /**
    * POST: Update a pet in the store with form data

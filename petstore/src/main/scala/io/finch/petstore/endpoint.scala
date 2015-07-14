@@ -6,6 +6,7 @@ import com.twitter.util.{Await, Future}
 import io.finch.argonaut._
 import io.finch.petstore.endpoint
 import io.finch.request._
+import io.finch.response._
 import io.finch.route._
 
 /**
@@ -127,8 +128,8 @@ object endpoint extends ErrorHandling {
    * @param db The petstore database.
    * @return A Router that contains a RequestReader of the deletePet result (true for success, false otherwise).
    */
-  def deletePetEndpt(db: PetstoreDb): Router[Future[Boolean]] = Delete / "pet" / long /> { petId: Long =>
-    db.deletePet(petId)
+  def deletePetEndpt(db: PetstoreDb): Router[Future[Response]] = Delete / "pet" / long /> { petId: Long =>
+    db.deletePet(petId).map(_ => NoContent())
   }
 
   /**

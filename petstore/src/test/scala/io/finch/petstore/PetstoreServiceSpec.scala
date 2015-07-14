@@ -34,12 +34,12 @@ trait PetstoreServiceSuite { this: FlatSpec with ServiceSuite with Matchers =>
     result.statusCode shouldBe 200
   }
 
-//  it should "fail to return invalid pets" in { f =>
-//    val request = Request("/pet/100")
-//    val result = Await.result(f.service(request))
-//
-//    result.statusCode shouldBe 404
-//  }
+  it should "fail to return invalid pets" in { f =>
+    val request = Request("/pet/100")
+    val result = Await.result(f.service(request))
+
+    result.statusCode shouldBe 404
+  }
 
   //addPetEndpt test
   it should "add valid pets" in { f =>
@@ -105,7 +105,7 @@ trait PetstoreServiceSuite { this: FlatSpec with ServiceSuite with Matchers =>
     val request: Request = RequestBuilder()
       .url("http://localhost:8080/pet/0").buildDelete
     val result: Response = f(request)
-    result.statusCode shouldBe 200
+    result.statusCode shouldBe 204
   }
 
   it should "fail to delete nonexistant pets" in {f =>
