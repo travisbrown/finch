@@ -11,7 +11,7 @@ import io.finch.route._
 /**
  * Provides the paths and endpoints for all the API's public service methods.
  */
-object endpoint{
+object endpoint extends ErrorHandling {
 
   /**
    * Private method that compiles all pet service endpoints.
@@ -43,8 +43,11 @@ object endpoint{
    * @param db The petstore database.
    * @return A service that contains all provided endpoints of the API.
    */
-  def makeService(db: PetstoreDb): Service[Request, Response] = (petEndpts(db) :+: storeEndpts(db) :+:
-      userEndpts(db)).toService
+  def makeService(db: PetstoreDb): Service[Request, Response] = handleExceptions andThen (
+    petEndpts(db) :+:
+    storeEndpts(db) :+:
+    userEndpts(db)
+  ).toService
 
 
   //+++++++++++++++PET ENDPOINTS+++++++++++++++++++++++++++++++++++++++++++
