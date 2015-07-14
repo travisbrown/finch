@@ -30,11 +30,13 @@ class PetSpec extends FlatSpec with Matchers with Checkers {
 Tests for the Status class
  */
 class StatusSpec extends FlatSpec with Matchers with Checkers {
-
-  "The Status codec" should "correctly fail to decode irrelevant JSON" in {
+  "The Status codec" should "correctly decode JSON" in {
     Parse.decodeOption[Status]("\"available\"") shouldBe Some(Available)
     Parse.decodeOption[Status]("\"pending\"") shouldBe Some(Pending)
     Parse.decodeOption[Status]("\"adopted\"") shouldBe Some(Adopted)
+  }
+
+  it should "fail to decode irrelevant JSON" in {
     Parse.decodeOption[Status]("") shouldBe None
 
     check{(randString: String) =>
