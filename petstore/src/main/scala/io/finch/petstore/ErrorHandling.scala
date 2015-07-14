@@ -30,8 +30,9 @@ trait ErrorHandling {
     case NotValid(ParamItem(p), rule) => BadRequest(
       Map("error" -> "param_not_valid", "param" -> p, "rule" -> rule).asJson
     )
-    case MissingPet(message) => NotFound(
-      Map("error" -> message).asJson
+    // Domain errors
+    case error: PetstoreError => NotFound(
+      Map("error" -> error.message).asJson
     )
   }
 

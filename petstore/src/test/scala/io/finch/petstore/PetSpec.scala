@@ -37,7 +37,7 @@ class StatusSpec extends FlatSpec with Matchers with Checkers {
   }
 
   it should "fail to decode irrelevant JSON" in {
-    Parse.decodeOption[Status]("") shouldBe None
+    Parse.decodeOption[Status]("\"foo\"") shouldBe None
 
     check{(randString: String) =>
       !List("available", "pending", "adopted)").contains(randString) ==> {
