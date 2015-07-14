@@ -38,7 +38,7 @@ class StatusSpec extends FlatSpec with Matchers with Checkers {
     Parse.decodeOption[Status]("") shouldBe None
 
     check{(randString: String) =>
-      (!List("available", "pending", "adopted)").contains(randString)) ==> {
+      !List("available", "pending", "adopted)").contains(randString) ==> {
         Parse.decodeOption[Status](randString) === None
       }
     }
@@ -71,6 +71,11 @@ class CategorySpec extends FlatSpec with Matchers with Checkers {
     check{cat: Category =>
       Parse.decodeOption[Category](cat.asJson.nospaces) === Some(cat)
     }
+  }
+
+  it should "correctly decode the case (id = 0, name = \")" in {
+    val json = s"""{ "id": 0, "name": \"}"""
+    assert(Parse.decodeOption[Category](json) == Some(Category(Option(0), "\"")))
   }
 }
 

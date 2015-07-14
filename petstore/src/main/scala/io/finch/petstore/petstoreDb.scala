@@ -34,7 +34,7 @@ class PetstoreDb {
    * @param id The ID of the pet in question.
    * @return true if it exists. false otherwise.
    */
-  def petExists(id: Long): Future[Boolean] = Future(
+  private def petExists(id: Long): Future[Boolean] = Future(
     pets.contains(id)
   )
 
@@ -369,9 +369,9 @@ class PetstoreDb {
    * @param name The username of the User to be found.
    * @return The User.
    */
-  def userExists(name: String): Future[Boolean] = Future.value(
-    users.values.exists(_.username == name)
-  )
+//  private def userExists(name: String): Future[Boolean] = Future.value(
+//    users.values.exists(_.username == name)
+//  )
 
   /**
    * PUT: Update User. Note that usernames cannot be changed because they are unique.

@@ -13,8 +13,9 @@ import org.scalatest.fixture.FlatSpec
 trait PetstoreServiceSuite { this: FlatSpec with ServiceSuite with Matchers =>
   def createService(): Service[Request, Response] = {
     val db = new PetstoreDb()
-    val rover = Pet(None, "Rover", Nil, Option(Category(None, "dog")), Option(Seq(Tag(None, "puppy"),
-      Tag(None, "white"))), Option(Available))
+    val rover = Pet(None, "Rover", Nil, Some(Category(None, "dog")), Some(Seq(Tag(None, "puppy"),
+      Tag(None, "white"))), Some(Available))
+    db.addPet(rover)
     db.addPet(Pet(None, "Sadaharu", Nil, Some(Category(None, "inugami")), Some(Nil), Some(Available)))
     db.addPet(Pet(None, "Despereaux", Nil, Some(Category(None, "mouse")), Some(Nil), Some(Available)))
     db.addPet(Pet(None, "Alexander", Nil, Some(Category(None, "mouse")), Some(Nil), Some(Pending)))
@@ -22,17 +23,11 @@ trait PetstoreServiceSuite { this: FlatSpec with ServiceSuite with Matchers =>
     db.addPet(Pet(None, "Cheshire Cat", Nil, Some(Category(None, "cat")), Some(Nil), Some(Available)))
     db.addPet(Pet(None, "Crookshanks", Nil, Some(Category(None, "cat")), Some(Nil), Some(Available)))
 
-    // Add your endpoint here
-//    (updatePetEndpt(db) :+: getPetEndpt(db) :+: uploadImageEndpt(db) :+: addUsersViaList(db)).toService
-
-//    def makeService(pdb: PetstoreDb) = (endpoint.petEndpts(pdb) :+: endpoint.storeEndpts(pdb) :+:
-//        endpoint.userEndpts(pdb)).toService
-
     endpoint.makeService(db)
   }
 
   //getPetEndpt test
-  "The petstore app" should "return valid pets" in { f =>
+  "The PetstoreApp" should "return valid pets" in { f =>
     val request = Request("/pet/1")
     val result = f(request)
 
@@ -66,22 +61,58 @@ trait PetstoreServiceSuite { this: FlatSpec with ServiceSuite with Matchers =>
   }
 
   //updatePetEndpt test
-//  it should "update valid pets" in {f =>
-//
-//  }
+  it should "update valid pets" in {f =>
+    val request: Request = RequestBuilder()
+      .url("http://localhost:8080/pet/6").buildPut(
+        Buf.Utf8(s"""
+             |{
+             |    "name": "A-Through-L",
+             |    "photoUrls":[],
+             |    "category":{"name":"Wyverary"},
+             |    "tags":[{"name":"Wyvern"}, {"name":"Library"}],
+             |    "status":"pending"
+             |  }
+           """.stripMargin))
+    val result: Response = f(request)
+
+    result.statusCode shouldBe 200
+  }
 
   //getPetsByStatusEndpt test
   it should "successfully find pets by status" in {f =>
-    val request: Request = Request("http://localhost:8080/pet/findByStatus?status=available")
+//    val request: Request = Request("http://localhost:8080/pet/findByStatus?status=available")
+    val request: Request = RequestBuilder()
+        .url("http://localhost:8080/pet/findByStatus?status=available")
+        .buildGet
     val result: Response = f(request)
     result.statusCode shouldBe 200
   }
 
+
   //getPetsByTagEndpt test
   it should "successfully find pets by tag" in {f =>
-    val request: Request = Request("http://localhost:8080/pet/findByTags?tags=puppy%2C%20white")
+//    val request: Request = Request("http://localhost:8080/pet/findByTags?tags=puppy%2C%20white")
+    val request: Request = RequestBuilder()
+      .url("http://localhost:8080/pet/findByTags?tags=puppy%2C%20white")
+    .buildGet
+    val result: Response = f(request)
+//    println(result.contentString)
+    result.statusCode shouldBe 200
+  }
+
+  //deletePetEndpt test
+  it should "successfully delete existing pets" in {f =>
+    val request: Request = RequestBuilder()
+      .url("http://localhost:8080/pet/0").buildDelete
     val result: Response = f(request)
     result.statusCode shouldBe 200
+  }
+
+  it should "fail to delete nonexistant pets" in {f =>
+    val request: Request = RequestBuilder()
+      .url("http://localhost:8080/pet/100").buildDelete
+    val result: Response = f(request)
+    result.statusCode shouldBe 404
   }
 
   //Add image
@@ -122,10 +153,6 @@ trait PetstoreServiceSuite { this: FlatSpec with ServiceSuite with Matchers =>
     result.statusCode shouldBe 200
 
   }
-
-//  it should "be able to add a list of users" in {
-//
-//  }
 
 }
 

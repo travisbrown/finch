@@ -184,11 +184,6 @@ case class Inventory(available: Int, pending: Int, adopted: Int)
  * Provides a codec for encoding and decoding Order objects.
  */
 object Inventory {
-  /**
-   * Encoding method that takes a Status and returns the corresponding string value in JSON.
-   */
-  val inventoryEncode: EncodeJson[Inventory] =
-    jencode3L((i:Inventory) => (i.available, i.pending, i.adopted))("available", "pending", "adopted")
 
   /**
    * Provides the encode/decode codec for Inventory objects.
