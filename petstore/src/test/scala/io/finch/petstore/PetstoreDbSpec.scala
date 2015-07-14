@@ -10,9 +10,9 @@ Tests for the PetstoreDb class methods
  */
 
 class PetstoreDbSpec extends FlatSpec with Matchers with Checkers {
-  val rover = Pet(None, "Rover", Nil, Option(Category(None, "dog")), Option(Seq(Tag(1, "puppy"),
-    Tag(2, "white"))), Option(Available))
-  val jack = Pet(None, "Jack", Nil, Option(Category(None, "dog")), Option(Seq(Tag(1, "puppy"))),
+  val rover = Pet(None, "Rover", Nil, Option(Category(None, "dog")), Option(Seq(Tag(None, "puppy"),
+    Tag(None, "white"))), Option(Available))
+  val jack = Pet(None, "Jack", Nil, Option(Category(None, "dog")), Option(Seq(Tag(None, "puppy"))),
     Option(Available))
   val sue = Pet(None, "Sue", Nil, Option(Category(None, "dog")), Option(Nil), Option(Adopted))
   val sadaharu = Pet(None, "Sadaharu", Nil, Option(Category(None, "inugami")), Option(Nil), Option(Available))

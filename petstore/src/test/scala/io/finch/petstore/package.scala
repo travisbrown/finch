@@ -21,7 +21,7 @@ package object petstore {
     for {
       id <- arbitrary[Long]
       name <- Gen.alphaStr
-    } yield Tag(id, name)
+    } yield Tag(Option(id), name)
   )
 
   implicit val petArbitrary: Arbitrary[Pet] = Arbitrary(
@@ -57,4 +57,13 @@ package object petstore {
       complete <- arbitrary[Option[Boolean]]
     } yield Order(id, petId, quantity, shipDate, Option(status), complete)
   )
+
+  implicit val inventoryArbitrary: Arbitrary[Inventory] = Arbitrary(
+    for{
+      available <- arbitrary[Int]
+      pending <- arbitrary[Int]
+      adopted <- arbitrary[Int]
+    } yield Inventory(available, pending, adopted)
+  )
+
 }

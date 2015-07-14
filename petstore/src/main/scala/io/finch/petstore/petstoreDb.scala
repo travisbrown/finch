@@ -49,10 +49,10 @@ class PetstoreDb {
   private def addTag(inputTag: Tag): Future[Tag] =
     tags.synchronized {
       inputTag.id match{
-        case x: Long => Future.exception(InvalidInput("New tag should not contain an id"))
+        case Some(x) => Future.exception(InvalidInput("New tag should not contain an id"))
         case _ => tags.synchronized{
           val genId = if (tags.isEmpty) 0 else tags.keys.max + 1
-          tags(genId) = inputTag.copy(id = genId)
+          tags(genId) = inputTag.copy(id = Option(genId))
           Future(tags(genId))
         }
       }
@@ -120,7 +120,6 @@ class PetstoreDb {
         Future.exception(MissingPet("Invalid id: doesn't exist"))
       }
     case None => Future.exception(MissingIdentifier(s"Missing id for pet: $inputPet"))
-    //    case None => Future.exception(MissingIdentifier(s"Missing id for pet: $inputPet"))
   }
 
   /**

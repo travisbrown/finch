@@ -82,7 +82,7 @@ class TagSpec extends FlatSpec with Matchers with Checkers{
     check{ (id: Long, name: String) =>
       (!name.contains("\"") && !name.contains("\\")) ==> {
         val json = s"""{ "id": $id, "name": "$name" }"""
-        Parse.decodeOption[Tag](json) === Some(Tag(id, name))
+        Parse.decodeOption[Tag](json) === Some(Tag(Option(id), name))
       }
     }
   }
@@ -129,6 +129,12 @@ class OrderSpec extends FlatSpec with Matchers with Checkers{
     }
   }
 
+  it should "fail to decode irrelevant JSON to Order" in {
+    check{ randString: String =>
+      Parse.decodeOption[Order](randString) === None
+    }
+  }
+
   it should "correctly encode an Order to JSON" in {
     check{ order: Order =>
       Parse.decodeOption[Order](order.asJson.nospaces) === Some(order)
@@ -155,3 +161,19 @@ class UserSpec extends FlatSpec with Matchers with Checkers{
   }
 }
 
+/*
+Tests for Inventory
+ */
+class InventorySpec extends FlatSpec with Matchers with Checkers{
+  "The Inventory codec" should "correctly decode JSON to Inventory" in {
+    check {i: Inventory =>
+      val json = i.asJson.toString
+      Parse.decodeOption[Inventory](json) === Some(i)
+    }
+  }
+   it should "correctly encode an Inventory to JSON" in {
+    check{i: Inventory =>
+      Parse.decodeOption[Inventory](i.asJson.nospaces) === Some(i)
+    }
+   }
+}

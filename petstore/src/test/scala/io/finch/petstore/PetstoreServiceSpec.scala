@@ -13,6 +13,8 @@ import org.scalatest.fixture.FlatSpec
 trait PetstoreServiceSuite { this: FlatSpec with ServiceSuite with Matchers =>
   def createService(): Service[Request, Response] = {
     val db = new PetstoreDb()
+    val rover = Pet(None, "Rover", Nil, Option(Category(None, "dog")), Option(Seq(Tag(None, "puppy"),
+      Tag(None, "white"))), Option(Available))
     db.addPet(Pet(None, "Sadaharu", Nil, Some(Category(None, "inugami")), Some(Nil), Some(Available)))
     db.addPet(Pet(None, "Despereaux", Nil, Some(Category(None, "mouse")), Some(Nil), Some(Available)))
     db.addPet(Pet(None, "Alexander", Nil, Some(Category(None, "mouse")), Some(Nil), Some(Pending)))
@@ -37,12 +39,12 @@ trait PetstoreServiceSuite { this: FlatSpec with ServiceSuite with Matchers =>
     result.statusCode shouldBe 200
   }
 
-  it should "fail to return invalid pets" in { f =>
-    val request = Request("/pet/2")
-    val result = Await.result(f.service(request))
-
-    result.statusCode shouldBe 200
-  }
+//  it should "fail to return invalid pets" in { f =>
+//    val request = Request("/pet/100")
+//    val result = Await.result(f.service(request))
+//
+//    result.statusCode shouldBe 404
+//  }
 
   //addPetEndpt test
   it should "add valid pets" in { f =>
@@ -60,6 +62,25 @@ trait PetstoreServiceSuite { this: FlatSpec with ServiceSuite with Matchers =>
         )
     val result: Response = f(request)
 
+    result.statusCode shouldBe 200
+  }
+
+  //updatePetEndpt test
+//  it should "update valid pets" in {f =>
+//
+//  }
+
+  //getPetsByStatusEndpt test
+  it should "successfully find pets by status" in {f =>
+    val request: Request = Request("http://localhost:8080/pet/findByStatus?status=available")
+    val result: Response = f(request)
+    result.statusCode shouldBe 200
+  }
+
+  //getPetsByTagEndpt test
+  it should "successfully find pets by tag" in {f =>
+    val request: Request = Request("http://localhost:8080/pet/findByTags?tags=puppy%2C%20white")
+    val result: Response = f(request)
     result.statusCode shouldBe 200
   }
 

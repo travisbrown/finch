@@ -18,9 +18,6 @@ class PetstoreApp {
   db.addPet(Pet(None, "Cheshire Cat", Nil, Some(Category(None, "cat")), Some(Nil), Some(Available)))
   db.addPet(Pet(None, "Crookshanks", Nil, Some(Category(None, "cat")), Some(Nil), Some(Available)))
 
-//  def makeService(pdb: PetstoreDb) = (endpoint.petEndpts(pdb) :+: endpoint.storeEndpts(pdb) :+:
-//      endpoint.userEndpts(pdb)).toService
-
   val service = endpoint.makeService(db)
 
   val server = Httpx.serve(":8080", service) //creates service

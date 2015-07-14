@@ -13,17 +13,38 @@ import io.finch.route._
  */
 object endpoint{
 
+  /**
+   * Private method that compiles all pet service endpoints.
+   * @param db The petstore database.
+   * @return Bundled compilation of all pet service endpoints.
+   */
   private def petEndpts(db: PetstoreDb) = getPetEndpt(db) :+: addPetEndpt(db) :+: updatePetEndpt(db) :+:
       getPetsByStatusEndpt(db) :+: findPetsByTagEndpt(db) :+: deletePetEndpt(db) :+: updatePetViaFormEndpt(db) :+:
       uploadImageEndpt(db)
 
+  /**
+   * Private method that compiles all store service endpoints.
+   * @param db The petstore database.
+   * @return Bundled compilation of all store service endpoints.
+   */
   private def storeEndpts(db: PetstoreDb) = getInventoryEndpt(db) :+: addOrderEndpt(db) :+: deleteOrderEndpt(db) :+:
       findOrderEndpt(db)
 
+  /**
+   * Private method that compiles all user service endpoints.
+   * @param db The petstore database.
+   * @return Bundled compilation of all user service endpoints.
+   */
   private def userEndpts(db: PetstoreDb) = addUserEndpt(db) :+: addUsersViaList(db) :+: addUsersViaArray(db) :+:
       getUserEndpt(db) :+: updateUserEndpt(db)
 
-  def makeService(db: PetstoreDb): Service[Request, Response] = (petEndpts(db) :+: storeEndpts(db) :+: userEndpts(db)).toService
+  /**
+   * Compiles together all the endpoints relating to public service methods.
+   * @param db The petstore database.
+   * @return A service that contains all provided endpoints of the API.
+   */
+  def makeService(db: PetstoreDb): Service[Request, Response] = (petEndpts(db) :+: storeEndpts(db) :+:
+      userEndpts(db)).toService
 
 
   //+++++++++++++++PET ENDPOINTS+++++++++++++++++++++++++++++++++++++++++++
